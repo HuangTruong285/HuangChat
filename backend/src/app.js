@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 
+import env from "./config/env.js";
 import authRoutes from "./routes/auth.routes.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
 
@@ -11,7 +12,7 @@ const app = express();
 // Cấu hình CORS
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: env.clientUrl,
     credentials: true,
   }),
 );
@@ -23,7 +24,7 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true }));
 // Log request ở môi trường dev
-if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
+if (env.nodeEnv !== "production") app.use(morgan("dev"));
 
 /* ---------------------------------- Routes --------------------------------- */
 // Route kiểm tra

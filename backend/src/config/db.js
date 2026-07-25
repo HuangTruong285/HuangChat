@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import env from "./env.js";
 
 const connectDB = async () => {
-  const url = env.mongoUri;
+  const url = env.mongoDB.uri;
 
   if (!url) {
     throw new Error(

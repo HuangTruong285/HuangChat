@@ -1,5 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config(); // Load biến môi trường trước khi import app
+import env from "./config/env.js";
 
 process.on("uncaughtException", (err) => {
   console.error("💥 UNCAUGHT EXCEPTION! Đang dừng server...");
@@ -11,7 +10,7 @@ import connectDB from "./config/db.js";
 import app from "./app.js";
 
 /* ----------------------------------- Boot ---------------------------------- */
-const PORT = process.env.PORT || 5000;
+const PORT = env.port;
 let server;
 
 const start = async () => {

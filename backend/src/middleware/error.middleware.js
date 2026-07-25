@@ -1,4 +1,5 @@
 import ApiError from "../utils/ApiError.js";
+import env from "../config/env.js";
 
 // Lỗi 404 xử lý cho tuyến đường không khớp
 export const notFound = (req, res, next) => {
@@ -43,7 +44,7 @@ export const errorHandler = (err, req, res, next) => {
   }
 
   // Log lỗi 500 dưới console khi dev
-  if (process.env.NODE_ENV !== "production" && statusCode === 500) {
+  if (env.nodeEnv !== "production" && statusCode === 500) {
     console.error("💥", err);
   }
 
@@ -52,7 +53,7 @@ export const errorHandler = (err, req, res, next) => {
     success: false,
     message,
     // Hiện dấu vết lỗi (stack trace) khi dev để dễ fix bug, giấu đi khi deploy production
-    ...(process.env.NODE_ENV !== "production" && statusCode === 500
+    ...(env.nodeEnv !== "production" && statusCode === 500
       ? { stack: err.stack }
       : {}),
   });
