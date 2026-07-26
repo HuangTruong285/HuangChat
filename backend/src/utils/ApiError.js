@@ -1,16 +1,20 @@
 class ApiError extends Error {
-  constructor(
+  constructor({
     statusCode = 500,
     message = "Internal Server Error",
     errors = [],
+    code = null,
     isOperational = true,
-    stack = "",
-  ) {
+    stack,
+  }) {
     super(message);
-    this.statusCode = statusCode;
-    this.errors = errors;
 
-    // Nhờ cờ này, hệ thống biết lỗi nào là an toàn để trả thông báo về cho khách hàng, lỗi nào cần cảnh báo để dev sửa gấp.
+    this.name = this.constructor.name;
+    this.statusCode = statusCode;
+    this.message = message;
+    this.errors = errors;
+    this.code = code;
+    // true: an toàn trả về ngưỜi dùng, false: trả về dev
     this.isOperational = isOperational;
     // Bắt lại stack trace để dễ debug khi dev
     if (stack) {
@@ -21,35 +25,77 @@ class ApiError extends Error {
   }
 
   // 400 Bad Request: Dữ liệu gửi lên không hợp lệ
-  static badRequest(message = "Dữ liệu không hợp lệ", errors = []) {
-    return new ApiError(400, message, errors, true);
+  static badRequest(message = "Bad Request", errors = []) {
+    return new ApiError({
+      statusCode: 400,
+      message,
+      errors,
+    });
   }
   // 401 Unauthorized: Chưa đăng nhập hoặc token hết hạn / không hợp lệ
-  static unauthorized(message = "Bạn cần đăng nhập để thực hiện thao tác này") {
-    return new ApiError(401, message, [], true);
+  static unauthorized(message = "Unauthorized") {
+    return new ApiError({
+      statusCode: 401,
+      message,
+    });
   }
   // 403 Forbidden: Đã đăng nhập nhưng không có quyền truy cập
-  static forbidden(message = "Bạn không có quyền thực hiện hành động này") {
-    return new ApiError(403, message, [], true);
+  static forbidden(message = "Forbidden") {
+    return new ApiError({
+      statusCode: 403,
+      message,
+    });
   }
   // 404 Not Found: Không tìm thấy tài nguyên (User, Room Chat, Message...)
-  static notFound(message = "Tài nguyên không tồn tại") {
-    return new ApiError(404, message, [], true);
+  static notFound(message = "Resources Not Found") {
+    return new ApiError({
+      statusCode: 404,
+      message,
+    });
+  }
+  // 405 Method not allow
+  static methodNotAllowed(message = "Method Not Allowed") {
+    return new ApiError({
+      statusCode: 404,
+      message,
+    });
   }
   // 409 Conflict: Xung đột dữ liệu (Ví dụ: Email / Username đã tồn tại)
-  static conflict(message = "Dữ liệu đã tồn tại trong hệ thống") {
-    return new ApiError(409, message, [], true);
+  static conflict(message = "Conflict") {
+    return new ApiError({
+      statusCode: 409,
+      message,
+    });
   }
   // 422 Unprocessable Entity: Thường dùng cho lỗi Validation chi tiết
-  static unprocessableEntity(message = "Lỗi xác thực dữ liệu", errors = []) {
-    return new ApiError(422, message, errors, true);
+  static unprocessableEntity(message = "Validation Failed", errors = []) {
+    return new ApiError({
+      statusCode: 422,
+      message,
+      errors,
+    });
   }
-  static tooMany(message = "Too many requests") {
-    return new ApiError(429, message, [], true);
+  static tooManyRequests(message = "Too Many Requests") {
+    return new ApiError({
+      statusCode: 429,
+      message,
+    });
   }
   // 500 Internal Server Error: Lỗi hệ thống nghiêm trọng (isOperational = false)
-  static internal(message = "Lỗi hệ thống nội bộ") {
-    return new ApiError(500, message, [], false);
+  static internal(message = "Internal Server Error") {
+    return new ApiError({
+      statusCode: 500,
+      message,
+      isOperational: false,
+    });
+  }
+
+  static serviceUnavailble(message = "Service Unavailable") {
+    return new ApiError({
+      statusCode: 503,
+      message,
+      isOperational: false,
+    });
   }
 }
 

@@ -1,5 +1,5 @@
-import ApiError from "../utils/ApiError.js";
 import env from "../config/env.js";
+import ApiError from "../utils/ApiError.js";
 
 // Lỗi 404 xử lý cho tuyến đường không khớp
 export const notFound = (req, res, next) => {
@@ -10,6 +10,10 @@ export const notFound = (req, res, next) => {
 export const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal server error";
+  let errors = err.errors || [];
+  if (err.isOperational === false) {
+    console.error("🔥 CRITICAL ERROR:", err);
+  }
 
   // Mongoose: bad ObjectId (Truyền sai dạng ID)
   if (err.name === "CastError") {
@@ -51,7 +55,9 @@ export const errorHandler = (err, req, res, next) => {
   // Trả về response cho client
   res.status(statusCode).json({
     success: false,
+    statusCode,
     message,
+    ...(errors.length > 0 && { errors }),
     // Hiện dấu vết lỗi (stack trace) khi dev để dễ fix bug, giấu đi khi deploy production
     ...(env.nodeEnv !== "production" && statusCode === 500
       ? { stack: err.stack }
