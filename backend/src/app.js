@@ -3,7 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 
 import env from "./config/env.js";
-import authRoutes from "./routes/auth.routes.js";
+import authRoutes from "./modules/auth/index.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
 
 const app = express();

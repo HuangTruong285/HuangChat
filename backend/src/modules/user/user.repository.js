@@ -1,4 +1,4 @@
-import User from "../models/User.js";
+import User from "./user.model.js";
 
 export const findUserByEmail = async (email, includePassword = false) => {
   const query = User.findOne({ email });
