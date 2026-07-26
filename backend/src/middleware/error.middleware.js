@@ -8,59 +8,63 @@ export const notFound = (req, res, next) => {
 
 // Middleware xử lý lỗi tập trung (Bắt buộc 4 tham số)
 export const errorHandler = (err, req, res, next) => {
-  let statusCode = err.statusCode || 500;
-  let message = err.message || "Internal server error";
-  let errors = err.errors || [];
-  if (err.isOperational === false) {
-    console.error("🔥 CRITICAL ERROR:", err);
-  }
+  let customError = err;
 
-  // Mongoose: bad ObjectId (Truyền sai dạng ID)
+  // Chuyển đổi các lỗi đặc thù thành ApiError
   if (err.name === "CastError") {
-    statusCode = 400;
-    message = `Invalid ${err.path}: ${err.value}`;
+    //Mongoose: bad ObjectId (Truyền sai dạng ID)
+    customError = ApiError.badRequest(`Invalid ${err.path}: ${err.value}`);
+  } else if (err.code === 11000) {
+    // Mongoose: duplicate key (Trùng email, username,...)
+    const fields = Object.keys(err.keyValue || {});
+    const fieldsNames = fields.length > 0 ? fields.join(", ") : "field";
+
+    customError = ApiError.conflict(`${fieldsName} already exists`);
+  } else if (err.name === "ValidationError") {
+    // Mongoose: schema validation
+    const errors = Object.values(err.errors).map((error) => ({
+      field: error.path,
+      message: error.message,
+    }));
+
+    customError = ApiError.unprocessableEntity("Validation failed", errors);
+  } else if (err.name === "JsonWebTokenError") {
+    // JWT: Sai token
+    customError = ApiError.unauthorized("Invalid token. Please log in again.");
+  } else if (err.name === "TokenExpiredError") {
+    //JWT: Hết hạn token
+    customError = ApiError.unauthorized(
+      "Token has expired. Please log in again",
+    );
   }
 
-  // Mongoose: duplicate key (Trùng email, username,...)
-  if (err.code === 11000) {
-    statusCode = 400;
-    const field = Object.keys(err.keyValue || {})[0] || "field";
-    message = `A record with that ${field} already exists`;
+  // Những Error thông thường -> Interal Server Eror
+  if (!(customError instanceof ApiError)) {
+    console.error("🔥 Unexpected Error:", err);
+
+    customError = ApiError.internal();
   }
 
-  // Mongoose: schema validation
-  if (err.name === "ValidationError") {
-    statusCode = 400;
-    message = Object.values(err.errors)
-      .map((e) => e.message)
-      .join(", ");
+  // Log các lỗi hệ thống nghiệm trọng
+  if (err.isOperational === false) {
+    console.error("🔥 Critical Error:", customError);
   }
 
-  // JWT: Sai token
-  if (err.name === "JsonWebTokenError") {
-    statusCode = 400;
-    message = "Invalid token, Please log in again!";
-  }
-  //JWT: Hết hạn token
-  if (err.name === "TokenExpiredError") {
-    statusCode = 401;
-    message = "Your token há expired! Please log in again.";
-  }
-
-  // Log lỗi 500 dưới console khi dev
-  if (env.nodeEnv !== "production" && statusCode === 500) {
-    console.error("💥", err);
-  }
-
-  // Trả về response cho client
-  res.status(statusCode).json({
+  const response = {
     success: false,
-    statusCode,
-    message,
-    ...(errors.length > 0 && { errors }),
-    // Hiện dấu vết lỗi (stack trace) khi dev để dễ fix bug, giấu đi khi deploy production
-    ...(env.nodeEnv !== "production" && statusCode === 500
-      ? { stack: err.stack }
-      : {}),
-  });
+    statusCode: customError.statusCode,
+    message: customError.message,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (customError.errors?.length) {
+    response.errors = customError.errors;
+  }
+
+  // Chỉ hiện stack khi đang phát triển
+  if (env.nodeEnv.toLowerCase() !== "production") {
+    response.stack = customError.stack;
+  }
+
+  return res.status(customError.statusCode).json(response);
 };
