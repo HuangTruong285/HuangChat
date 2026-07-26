@@ -12,19 +12,19 @@ export const protect = asyncHandler(async (req, res, next) => {
   }
 
   if (!token) {
-    throw new ApiError(401, "Not authorized, no token provided");
+    throw ApiError.unauthorized("Not authorized, no token provided");
   }
 
   let decoded;
   try {
     decoded = verifyAccessToken(token);
   } catch {
-    throw new ApiError(401, "Not, authorized, token invalid or expired");
+    throw ApiError.unauthorized("Not, authorized, token invalid or expired");
   }
 
   const user = await User.findById(decoded.id);
   if (!user) {
-    throw new ApiError(401, "Not authorized, user no longer exists");
+    throw ApiError.unauthorized("Not authorized, user no longer exists");
   }
 
   req.user = user;

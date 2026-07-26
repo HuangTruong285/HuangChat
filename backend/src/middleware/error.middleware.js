@@ -3,7 +3,7 @@ import env from "../config/env.js";
 
 // Lỗi 404 xử lý cho tuyến đường không khớp
 export const notFound = (req, res, next) => {
-  next(new ApiError(404, `Route not found: ${req.method} ${req.originalUrl}`));
+  next(ApiError.notFound(`Route not found: ${req.method} ${req.originalUrl}`));
 };
 
 // Middleware xử lý lỗi tập trung (Bắt buộc 4 tham số)

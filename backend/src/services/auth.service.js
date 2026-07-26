@@ -9,7 +9,7 @@ export const register = async ({ username, email, password }) => {
   // Kiểm tra email đã được sử dụng chưa?
   const existingUser = await userRepository.findUserByEmail(email);
   if (existingUser) {
-    throw new ApiError(409, "Email already exists");
+    throw ApiError.conflict("Email already exists");
   }
 
   // Tạo một document cho vào DB
@@ -29,13 +29,13 @@ export const login = async ({ email, password }) => {
   // Kiểm tra có tài khoản này không
   const user = await userRepository.findUserByEmail(email, true);
   if (!user) {
-    throw new ApiError(401, "Invalid email or password");
+    throw ApiError.unauthorized("Invalid email or password");
   }
 
   // Kiểm tra password có trùng không
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    throw new ApiError(401, "Invalid email or password");
+    throw ApiError.unauthorized("Invalid email or password");
   }
 
   const accessToken = generateAccessToken(user._id);
@@ -46,7 +46,7 @@ export const getMe = async (userId) => {
   // Kiểm tra có user ko
   const user = await userRepository.findUserById(userId);
   if (!user) {
-    throw new ApiError(404, "User not found");
+    throw ApiError.notFound("User not found");
   }
 
   return toUserResponse(user);
