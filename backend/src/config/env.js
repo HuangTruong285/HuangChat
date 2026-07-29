@@ -1,40 +1,66 @@
 import dotenv from "dotenv";
 
+// Load biến môi trường từ file .env vào process.env
 dotenv.config();
 
-const validateEnv = () => {
-  const requiredEnvs = ["MONGO_URI", "JWT_SECRET"];
-  const missingEnvs = requiredEnvs.filter((key) => !process.env[key]);
+// Các biến môi trường bắt buộc phải có
+const requiredEnvs = ["MONGO_URI", "JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"];
 
-  if (missingEnvs.length > 0) {
-    throw new Error(
-      `❌ Thất bại khi khởi chạy! Thiếu các biến môi trường: ${missingEnvs.join(", ")}`,
-    );
-  }
-};
+// Lọc ra những biến bị thiếu
+const missingEnvs = requiredEnvs.filter((key) => !process.env[key]?.trim());
 
-validateEnv();
+// Nếu thiếu thì dừng chương trình
+if (missingEnvs.length > 0) {
+  throw new Error(
+    `❌ Thiếu biến môi trường bắt buộc: ${missingEnvs.join(", ")}`,
+  );
+}
 
-// Lấy nodeEnv chuẩn có giá trị mặc định trước
-const nodeEnv = process.env.NODE_ENV || "development";
+// Lấy môi trường chạy: development, production, test
+const nodeEnv = (process.env.NODE_ENV || "development").toLowerCase();
+const allowedEnvs = ["development", "production", "test"];
 
-// Gom các biến vào 1 object chuẩn hoá
+// Kiểm tra NODE_ENV có hợp lệ không
+if (!allowedEnvs.includes(nodeEnv)) {
+  throw new Error(`❌ NODE_ENV không hợp lệ: ${nodeEnv}`);
+}
+
+// Chuyển PORT sang số nguyên
+const parsedPort = Number.parseInt(process.env.PORT || "5000", 10);
+
+// Tạo object chứa cấu hình môi trường
 const env = {
-  port: Number(process.env.PORT) || 5000,
+  port: Number.isNaN(parsedPort) ? 5000 : parsedPort, // Cổng server
   nodeEnv,
-  isDev: process.env.NODE_ENV === "development",
-  isProd: process.env.NODE_ENV === "production",
+  isDev: nodeEnv === "development", // Có phải môi trường dev không
+  isProd: nodeEnv === "production", // Có phải môi trường prod không
 
-  clientUrl: process.env.CLIENT_URL?.trim() || "http://localhost:5173",
+  // URL frontend cho phép truy cập
+  clientUrl:
+    process.env.CLIENT_URL?.trim() ||
+    (nodeEnv === "production" ? "" : "http://localhost:5173"),
 
+  // Cấu hình MongoDB
   mongoDB: {
     uri: process.env.MONGO_URI?.trim(),
   },
 
+  // Cấu hình JWT
   jwt: {
-    secret: process.env.JWT_SECRET?.trim(),
-    expiresIn: process.env.JWT_EXPIRES_IN?.trim() || "7d",
+    accessSecret: process.env.JWT_ACCESS_SECRET?.trim(),
+    refreshSecret: process.env.JWT_REFRESH_SECRET?.trim(),
+
+    accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN?.trim() || "15m",
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN?.trim() || "7d",
+
+    issuer: process.env.JWT_ISSUER?.trim() || "huangchat",
+    audience: process.env.JWT_AUDIENCE?.trim() || "huangchat-client",
   },
 };
+
+// Ngăn thay đổi object cấu hình sau này
+Object.freeze(env);
+Object.freeze(env.mongoDB);
+Object.freeze(env.jwt);
 
 export default env;

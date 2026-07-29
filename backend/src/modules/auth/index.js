@@ -1,5 +1,6 @@
 // src/modules/auth/index.js
 import authRoutes from "./auth.routes.js";
+
 // import * as authService from './auth.service.js';
 
 // Export router làm default

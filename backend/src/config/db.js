@@ -10,8 +10,11 @@ const connectDB = async () => {
     );
   }
 
-  //// Tránh gây nhiễu thông báo lỗi và khiến các truy vấn thất bại nhanh chóng thay vì bị đệm mãi mãi.
   mongoose.set("strictQuery", true);
+
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
 
   try {
     const conn = await mongoose.connect(url, {
@@ -23,7 +26,7 @@ const connectDB = async () => {
     return conn;
   } catch (error) {
     console.error(`❌ MongoDB connection error: ${error.message}`);
-    process.exit(1); // Dừng ứng dụng nếu không thể kết nối DB
+    throw error;
   }
 };
 

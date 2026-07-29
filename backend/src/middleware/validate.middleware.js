@@ -1,7 +1,7 @@
 import { validationResult } from "express-validator";
+import ApiError from "../utils/ApiError.js";
 
 const validate = (req, res, next) => {
-  // validationResult quét qua req để tìm các lỗi từ validator trước đó
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -10,12 +10,11 @@ const validate = (req, res, next) => {
       message: err.msg,
     }));
 
-    return res.status(400).json({
-      success: false,
-      message: "Dữ liệu đầu vào không hợp lệ",
-      errors: formattedErrors,
-    });
+    return next(
+      ApiError.badRequest("Dữ liệu đầu vào không hợp lệ", formattedErrors),
+    );
   }
+
   next();
 };
 

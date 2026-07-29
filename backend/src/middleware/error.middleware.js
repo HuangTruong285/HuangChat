@@ -12,41 +12,35 @@ export const errorHandler = (err, req, res, next) => {
 
   // Chuyển đổi các lỗi đặc thù thành ApiError
   if (err.name === "CastError") {
-    //Mongoose: bad ObjectId (Truyền sai dạng ID)
     customError = ApiError.badRequest(`Invalid ${err.path}: ${err.value}`);
   } else if (err.code === 11000) {
-    // Mongoose: duplicate key (Trùng email, username,...)
     const fields = Object.keys(err.keyValue || {});
     const fieldsNames = fields.length > 0 ? fields.join(", ") : "field";
 
-    customError = ApiError.conflict(`${fieldsName} already exists`);
+    customError = ApiError.conflict(`${fieldsNames} already exists`);
   } else if (err.name === "ValidationError") {
-    // Mongoose: schema validation
-    const errors = Object.values(err.errors).map((error) => ({
+    const errors = Object.values(err.errors || {}).map((error) => ({
       field: error.path,
       message: error.message,
     }));
 
     customError = ApiError.unprocessableEntity("Validation failed", errors);
   } else if (err.name === "JsonWebTokenError") {
-    // JWT: Sai token
     customError = ApiError.unauthorized("Invalid token. Please log in again.");
   } else if (err.name === "TokenExpiredError") {
-    //JWT: Hết hạn token
     customError = ApiError.unauthorized(
       "Token has expired. Please log in again",
     );
   }
 
-  // Những Error thông thường -> Interal Server Eror
+  // Những Error thông thường -> Internal Server Error
   if (!(customError instanceof ApiError)) {
     console.error("🔥 Unexpected Error:", err);
-
     customError = ApiError.internal();
   }
 
-  // Log các lỗi hệ thống nghiệm trọng
-  if (err.isOperational === false) {
+  // Log các lỗi hệ thống nghiêm trọng
+  if (customError.isOperational === false) {
     console.error("🔥 Critical Error:", customError);
   }
 
@@ -61,8 +55,8 @@ export const errorHandler = (err, req, res, next) => {
     response.errors = customError.errors;
   }
 
-  // Chỉ hiện stack khi đang phát triển
-  if (env.nodeEnv.toLowerCase() !== "production") {
+  const isProduction = (env.nodeEnv || "").toLowerCase() === "production";
+  if (!isProduction) {
     response.stack = customError.stack;
   }
 

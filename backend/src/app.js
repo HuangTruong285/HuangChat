@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
 });
 
 // Routes chính
-app.use("/api/auth", authRoutes);
+app.use("/v1/api/auth", authRoutes);
 
 /* --------------------------- Error handling {last} ------------------------- */
 // Bắt các route không tồn tại (Lỗi 404)
