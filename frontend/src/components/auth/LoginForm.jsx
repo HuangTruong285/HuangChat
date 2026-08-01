@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../../hook/useAuth";
 
 export default function LoginForm({ onSwitchForm }) {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ identifier: "", password: "" });
   const [error, setError] = useState("");
 
   const { login, loading } = useAuth();
@@ -29,12 +29,8 @@ export default function LoginForm({ onSwitchForm }) {
     e.preventDefault();
     setError("");
 
-    if (!formData.email.trim()) {
-      setError("Email không được để trống");
-      return;
-    }
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      setError("Email không hợp lệ");
+    if (!formData.identifier.trim()) {
+      setError("Tên đăng nhập hoặc email không được để trống");
       return;
     }
     if (!formData.password) {
@@ -62,11 +58,11 @@ export default function LoginForm({ onSwitchForm }) {
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
         <div>
           <input
-            type="email"
-            name="email"
-            placeholder="Email"
+            type="text"
+            name="identifier"
+            placeholder="Tên đăng nhập hoặc Email"
             disabled={loading}
-            value={formData.email}
+            value={formData.identifier}
             onChange={handleChange}
             className="w-full rounded border border-gray-300 p-3 transition outline-none focus:border-indigo-600 disabled:bg-gray-100"
           />

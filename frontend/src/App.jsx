@@ -13,24 +13,25 @@ import PublicRoute from "./routes/PublicRoute";
 
 function App() {
   const { initializing } = useAuth();
-  if (initializing) {
-    return <LoadingPage />;
-  }
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route element={<PublicRoute />}>
-          <Route path="/auth" element={<AuthPage />} />
-          {/* <Route path="/verify-email" .../>
+      {initializing ? (
+        <LoadingPage />
+      ) : (
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route element={<PublicRoute />}>
+            <Route path="/auth" element={<AuthPage />} />
+            {/* <Route path="/verify-email" .../>
           <Route path="/forgot-password".../> */}
-        </Route>
-        <Route element={<ProtectedRoute />}>
-          <Route path="/chat" element={<ChatPage />} />
-        </Route>
+          </Route>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/chat" element={<ChatPage />} />
+          </Route>
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      )}
     </BrowserRouter>
   );
 }

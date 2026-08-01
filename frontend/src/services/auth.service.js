@@ -1,32 +1,40 @@
-import * as authAPI from "../api/auth.api";
+import * as authApi from "../api/auth.api";
 
+// Đăng ký
 export const register = async (registerData) => {
-  try {
-    const response = await authAPI.register(registerData);
-    const data = response.data;
-    if (data?.accessToken) {
-      localStorage.setItem("accessToken", data.accessToken);
-    }
-    return data;
-  } catch (error) {}
-};
+  const response = await authApi.register(registerData);
 
-export const login = async (loginData) => {
-  const response = await authAPI.login(loginData);
-  const data = response.data;
+  const data = response.data.data;
+
   localStorage.setItem("accessToken", data.accessToken);
-  return data;
+
+  return data.user;
 };
 
-export const getMe = async () => {
-  const response = await authAPI.getMe();
-  return response.data;
+// Đăng nhập
+export const login = async (loginData) => {
+  const response = await authApi.login(loginData);
+
+  const data = response.data.data;
+
+  localStorage.setItem("accessToken", data.accessToken);
+
+  return data.user;
+};
+
+export const refresh = async () => {
+  const response = await authApi.refresh();
+
+  const data = response.data.data;
+
+  localStorage.setItem("accessToken", data.accessToken);
+
+  return data.accessToken;
 };
 
 export const logout = async () => {
   try {
-    const response = await authAPI.logout();
-    return response.data;
+    await authApi.logout();
   } finally {
     localStorage.removeItem("accessToken");
   }

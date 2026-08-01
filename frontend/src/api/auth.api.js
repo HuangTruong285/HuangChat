@@ -2,6 +2,5 @@ import api from "./axios";
 
 export const register = (data) => api.post("v1/api/auth/register", data);
 export const login = (data) => api.post("v1/api/auth/login", data);
-export const getMe = () => api.get("v1/api/auth/me");
-
-export const logout = () => api.post("/auth/logout");
+export const refresh = () => api.post("v1/api/auth/refresh");
+export const logout = () => api.post("v1/api/auth/logout");

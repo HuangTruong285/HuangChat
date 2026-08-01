@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import * as authService from "../services/auth.service";
+import * as userService from "../services/user.service";
 
 export const AuthContext = createContext(null);
 
@@ -9,12 +10,22 @@ export default function AuthProvider({ children }) {
   const [initializing, setInitializing] = useState(true);
   const isAuthenticated = !!user;
 
+  // Lấy thông tin user từ acces token
   const loadUser = async () => {
     setInitializing(true);
     try {
-      const result = await authService.getMe();
-      setUser(result);
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (!accessToken) {
+        setUser(null);
+        return;
+      }
+
+      const currentUser = await userService.getMe();
+
+      setUser(currentUser);
     } catch (error) {
+      localStorage.removeItem("accessToken");
       setUser(null);
     } finally {
       setInitializing(false);
@@ -28,11 +39,11 @@ export default function AuthProvider({ children }) {
   const login = async (loginData) => {
     setLoading(true);
     try {
-      const result = await authService.login(loginData);
-      setUser(result.user);
-      return result;
-    } catch (error) {
-      throw error;
+      const currentUser = await authService.login(loginData);
+
+      setUser(currentUser);
+
+      return currentUser;
     } finally {
       setLoading(false);
     }
@@ -40,43 +51,34 @@ export default function AuthProvider({ children }) {
 
   const register = async (registerData) => {
     setLoading(true);
-
     try {
-      const result = await authService.register(registerData);
-      if (result.user) {
-        setUser(result.data.user);
-      }
-      return result;
-    } catch (error) {
-      throw error;
+      const currentUser = await authService.register(registerData);
+
+      setUser(currentUser);
+
+      return currentUser;
     } finally {
       setLoading(false);
     }
   };
 
   const logout = async () => {
-    setLoading(true);
     try {
       await authService.logout();
     } finally {
       setUser(null);
-      setLoading(false);
     }
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        initializing,
-        isAuthenticated,
-        login,
-        register,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = {
+    user,
+    loading,
+    initializing,
+    isAuthenticated,
+    login,
+    register,
+    logout,
+    loadUser,
+  };
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
