@@ -1,36 +1,21 @@
 import { Router } from "express";
 
-import * as authController from "./auth.controller.js";
-import * as authValidator from "./auth.validator.js";
-
-import { protect } from "../../middleware/auth.middleware.js";
+import authController from "./auth.controller.js";
+import { registerValidator, loginValidator } from "./auth.validator.js";
 import validate from "../../middleware/validate.middleware.js";
 
 const router = Router();
 
 // Route đăng ký tài khoản mới
-router.post(
-  "/register",
-  authValidator.registerValidator,
-  validate,
-  authController.registerController,
-);
+router.post("/register", registerValidator, validate, authController.register);
 
 // Route đăng nhập
-router.post(
-  "/login",
-  authValidator.loginValidator,
-  validate,
-  authController.loginController,
-);
+router.post("/login", loginValidator, validate, authController.login);
 
 // Route làm mới access token bằng refresh token
-router.post("/refresh", authController.refreshTokenController);
+router.post("/refresh", authController.refresh);
 
 // Route đăng xuất
-router.post("/logout", protect, authController.logoutController);
-
-// Route lấy thông tin user hiện tại
-router.get("/me", protect, authController.getMeController);
+router.post("/logout", authController.logout);
 
 export default router;

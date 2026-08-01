@@ -1,56 +1,53 @@
 import RefreshToken from "./refreshToken.model.js";
 
-/**
- * Repository cho refresh token.
- *
- * Dùng để tách logic truy cập DB khỏi service.
- *
- * Các method chính:
- * - createRefreshToken(userId, rawToken, expiresAt): lưu token mới
- * - createOrReplaceRefreshToken(userId, rawToken, expiresAt): tạo token mới và thu hồi token cũ
- * - findValidRefreshToken(rawToken): tìm token còn hợp lệ
- * - revokeRefreshToken(tokenDoc): thu hồi một token cụ thể
- * - revokeAllForUser(userId): thu hồi tất cả token đang hoạt động của user
- */
+/*
+  create: Tạo refresh token mới
+  findByToken: Tìm refresh token theo token
+  findByUserId: Tìm tất cả refresh token của user
+  revokeByToken: Thu hồi refresh token theo token
+  revokeAllByUserId: Thu hồi tất cả refresh token của user
+  deleteByToken: Xoá refresh token theo token
+  deleteAllByUserId: Xoá tất cả refresh token của user
+*/
 
-// Tạo mới một refresh token cho user
-export const createRefreshToken = async (userId, rawToken, expiresAt) => {
-  return RefreshToken.createForUser(userId, rawToken, expiresAt);
+// Tạo refresh token mới
+export const create = (data) => {
+  return RefreshToken.create(data);
 };
 
-// Tạo token mới và thu hồi token cũ của cùng user
-export const createOrReplaceRefreshToken = async (
-  userId,
-  rawToken,
-  expiresAt,
-) => {
-  return RefreshToken.createOrReplaceForUser(userId, rawToken, expiresAt);
+// Tìm refresh token theo token
+export const findByToken = (token) => {
+  return RefreshToken.findOne({ token });
 };
 
-// Tìm token còn hợp lệ trong DB
-export const findValidRefreshToken = async (rawToken) => {
-  return RefreshToken.findValidToken(rawToken);
+// Lấy tất cả refresh token của user
+export const findByUserId = (userId) => {
+  return RefreshToken.find({ user: userId });
 };
 
-// Thu hồi một token cụ thể
-export const revokeRefreshToken = async (tokenDoc) => {
-  if (!tokenDoc) return null;
-
-  return tokenDoc.revoke();
-};
-
-// Thu hồi tất cả token đang hoạt động của user
-export const revokeAllForUser = async (userId) => {
-  return RefreshToken.updateMany(
-    { user: userId, revoked: false },
-    { $set: { revoked: true } },
+// Thu hồi refresh token
+export const revokeByToken = (token) => {
+  return RefreshToken.findOneAndUpdate(
+    { token },
+    { revoked: true },
+    { new: true },
   );
 };
 
-export default {
-  createRefreshToken,
-  createOrReplaceRefreshToken,
-  findValidRefreshToken,
-  revokeRefreshToken,
-  revokeAllForUser,
+// Thu hồi tất cả refresh token của user
+export const revokeAllByUserId = (userId) => {
+  return RefreshToken.updateMany(
+    { user: userId, revoked: false },
+    { revoked: true },
+  );
+};
+
+// Xoá refresh token theo token
+export const deleteByToken = (token) => {
+  return RefreshToken.findOneAndDelete({ token });
+};
+
+// Xoá tất cả refresh token của user
+export const deleteAllByUserId = (userId) => {
+  return RefreshToken.deleteMany({ user: userId });
 };

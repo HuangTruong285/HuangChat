@@ -1,9 +1,11 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 
 import env from "./config/env.js";
 import authRoutes from "./modules/auth/index.js";
+import userRoutes from "./modules/user/index.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
 
 const app = express();
@@ -16,6 +18,7 @@ app.use(
     credentials: true,
   }),
 );
+app.use(cookieParser()); // Parse cookie
 // Parse dữ liệu đầu vào (Body Parser)
 app.use(
   express.json({
@@ -34,6 +37,7 @@ app.get("/", (req, res) => {
 
 // Routes chính
 app.use("/v1/api/auth", authRoutes);
+app.use("/v1/api/users", userRoutes);
 
 /* --------------------------- Error handling {last} ------------------------- */
 // Bắt các route không tồn tại (Lỗi 404)

@@ -1,76 +1,75 @@
 import User from "./user.model.js";
 
-/**
- * Repository cho user.
- *
- * Các method chính:
- * - findUserByEmail(email): tìm user theo email
- * - findUserByUsername(username): tìm user theo username
- * - findUserById(id): tìm user theo id
- * - createUser(userData): tạo user mới
- * - updateUserById(id, updateData): cập nhật user
- *
- * Dùng để tách logic truy cập DB khỏi service.
- */
-
-// Tìm user bằng email
-export const findUserByEmail = async (email, includePassword = false) => {
-  const normalizedEmail = String(email || "")
-    .trim()
-    .toLowerCase();
-
-  if (!normalizedEmail) return null;
-
-  const query = User.findOne({ email: normalizedEmail });
-
-  if (includePassword) {
-    query.select("+password");
-  }
-
-  return query.exec();
-};
-
-// Tìm user bằng username
-export const findUserByUsername = async (username, includePassword = false) => {
-  const normalizedUsername = String(username || "")
-    .trim()
-    .toLowerCase();
-
-  if (!normalizedUsername) return null;
-
-  const query = User.findOne({ username: normalizedUsername });
-
-  if (includePassword) {
-    query.select("+password");
-  }
-
-  return query.exec();
-};
-
-// Tìm user theo ID
-export const findUserById = async (id, includePassword = false) => {
-  if (!id) return null;
-
-  const query = User.findById(id);
-
-  if (includePassword) {
-    query.select("+password");
-  }
-
-  return query.exec();
-};
+/*
+  create: Tạo user mới
+  findById: Tìm user theo id
+  findByUsername: Tìm user theo username
+  findByEmail: Tìm user theo email
+  findByUsernameOrEmail: Tìm user theo username hoặc email
+  updateById: Cập nhật thông tin user
+  updateStatusById: Cập nhật trạng thái online/offline của user
+  deleteById: Xoá user theo id
+*/
 
 // Tạo user mới
-export const createUser = async (userData) => {
-  return User.create(userData);
+export const create = (data) => {
+  return User.create(data);
 };
 
-// Cập nhật user theo ID
-export const updateUserById = async (id, updateData) => {
-  if (!id) return null;
+// Tìm theo id
+export const findById = (id) => {
+  return User.findById(id);
+};
 
-  return User.findByIdAndUpdate(id, updateData, {
+// Tìm theo username
+export const findByUsername = (username) => {
+  return User.findOne({ username });
+};
+
+// Tìm theo email
+export const findByEmail = (email) => {
+  return User.findOne({ email });
+};
+
+// Tìm theo username hoặc email
+export const findByUsernameOrEmail = (identifier) => {
+  return User.findOne({
+    $or: [{ username: identifier }, { email: identifier }],
+  }).select("+password");
+};
+
+// Cập nhật thông tin user
+export const updateById = (id, data) => {
+  return User.findByIdAndUpdate(id, data, {
     new: true,
     runValidators: true,
   });
+};
+
+// Cập nhật trang thái online/offline của user
+export const updateStatusById = (id, status) => {
+  return User.findByIdAndUpdate(
+    id,
+    {
+      status,
+      lastSeen: status === "offline" ? new Date() : null,
+    },
+    { new: true },
+  );
+};
+
+// Xoá user theo id
+export const deleteById = (id) => {
+  return User.findByIdAndDelete(id);
+};
+
+export default {
+  create,
+  findById,
+  findByUsername,
+  findByEmail,
+  findByUsernameOrEmail,
+  updateById,
+  updateStatusById,
+  deleteById,
 };

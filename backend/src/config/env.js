@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Các biến môi trường bắt buộc phải có
-const requiredEnvs = ["MONGO_URI", "JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"];
+const requiredEnvs = ["MONGO_URI", "JWT_ACCESS_SECRET"];
 
 // Lọc ra những biến bị thiếu
 const missingEnvs = requiredEnvs.filter((key) => !process.env[key]?.trim());
@@ -48,13 +48,7 @@ const env = {
   // Cấu hình JWT
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET?.trim(),
-    refreshSecret: process.env.JWT_REFRESH_SECRET?.trim(),
-
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN?.trim() || "15m",
-    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN?.trim() || "7d",
-
-    issuer: process.env.JWT_ISSUER?.trim() || "huangchat",
-    audience: process.env.JWT_AUDIENCE?.trim() || "huangchat-client",
   },
 };
 
