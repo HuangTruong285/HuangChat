@@ -55,7 +55,7 @@ export const register = async ({ username, email, password }) => {
 
 export const login = async ({ identifier, password }) => {
   // Tìm user theo username hoặc email
-  const user = await userRepository.findByUsernameOrEmail(identifier);
+  const user = await userRepository.findForAuth(identifier);
   if (!user) {
     throw ApiError.unauthorized("Invalid username or password");
   }
