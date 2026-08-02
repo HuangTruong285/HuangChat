@@ -26,9 +26,9 @@ function App() {
           <Route path="/forgot-password".../> */}
           </Route>
           <Route element={<ProtectedRoute />}>
-            <Route path="/chat" element={<ChatPage />} />
+            {/* <Route path="/chat" element={<ChatPage />} /> */}
           </Route>
-
+          <Route path="/chat" element={<ChatPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
