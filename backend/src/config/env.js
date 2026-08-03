@@ -50,6 +50,10 @@ const env = {
     accessSecret: process.env.JWT_ACCESS_SECRET?.trim(),
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN?.trim() || "15m",
   },
+
+  bcrypt: {
+    saltRounds: process.env.SALT_ROUNDS || 12,
+  },
 };
 
 // Ngăn thay đổi object cấu hình sau này

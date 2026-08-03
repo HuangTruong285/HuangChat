@@ -10,10 +10,10 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
   }
 
   // Lấy token từ header
-  const accessToken = authHeader.split(" ")[1];
+  const refreshToken = authHeader.split(" ")[1];
 
   // Xác thực token
-  const decoded = verifyAccessToken(accessToken);
+  const decoded = verifyAccessToken(refreshToken);
 
   // Lưu thông tin user vào request để sử dụng ở các middleware hoặc route tiếp theo
   req.user = { id: decoded.id };

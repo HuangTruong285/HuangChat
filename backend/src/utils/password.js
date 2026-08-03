@@ -1,10 +1,9 @@
 import bcrypt from "bcryptjs";
-
-const SALT_ROUNDS = 10;
+import env from "../config/env.js";
 
 // Mã hóa mật khẩu
 export const hashPassword = async (password) => {
-  const salt = await bcrypt.genSalt(SALT_ROUNDS);
+  const salt = await bcrypt.genSalt(env.bcrypt.saltRounds);
   const hashedPassword = await bcrypt.hash(password, salt);
   return hashedPassword;
 };

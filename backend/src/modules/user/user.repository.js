@@ -1,114 +1,144 @@
 import User from "./user.model.js";
 
-/*
-  create: Tạo user mới
-  findById: Tìm user theo id
-  findByUsername: Tìm user theo username
-  findByEmail: Tìm user theo email
-  findForAuth: Tìm user theo username hoặc email
-  updateById: Cập nhật thông tin user
-  updateStatusById: Cập nhật trạng thái online/offline của user
-  deleteById: Xoá user theo id
-*/
+// ============================== 1. CREATE ==============================
 
-// Tạo user mới
+//Tạo một User mới trong CSDL
 export const create = (data) => {
   return User.create(data);
 };
 
-// Tìm theo id
+// ============================== 2. READ / FIND ==============================
+
+// Tìm User theo ID (Mặc định ẩn password)
 export const findById = (id) => {
   return User.findById(id);
 };
 
-// Lấy thông tin public của user
-const findPublicById = (id) => {
-  return User.findById(id).select("username avatar status lastSeen");
+// Tìm User theo ID và LẤY KÈM password (Dùng cho xác thực/đổi mật khẩu)
+export const findByIdWithPassword = (id) => {
+  return User.findById(id).select("+password");
 };
 
-// Tìm theo username
+// Lấy thông tin công khai của User (Thích hợp cho Profile public)
+export const findPublicById = (id) => {
+  return User.findById(id).select(
+    "username displayName avatar bio status lastSeen",
+  );
+};
+
+// Tìm User theo Username
 export const findByUsername = (username) => {
   return User.findOne({ username });
 };
 
-// Tìm theo email
+// Tìm User theo Email
 export const findByEmail = (email) => {
   return User.findOne({ email });
 };
 
-// Tìm theo username hoặc email
-export const findForAuth = (identifier) => {
+// Tìm User bằng Username HOẶC Email + lấy kèm password (Dùng cho Đăng nhập)
+export const findByIdentifier = (identifier) => {
   return User.findOne({
     $or: [{ username: identifier }, { email: identifier }],
   }).select("+password");
 };
 
-// Kiểm tra username đã tồn tại
-const existsByUsername = (username) => {
-  User.exists({ username });
+// Kiểm tra xem Username đã tồn tại chưa (Trả về {_id} hoặc null)
+export const existsByUsername = (username) => {
+  return User.exists({ username });
 };
 
-// Kiểm tra email đã tồn tại
-const existsByEmail = (email) => {
-  User.exists({ email });
+// Kiểm tra xem Email đã tồn tại chưa (Trả về {_id} hoặc null)
+export const existsByEmail = (email) => {
+  return User.exists({ email });
 };
 
-// Cập nhật thông tin user
-export const updateById = (id, data) => {
-  return User.findByIdAndUpdate(id, data, {
-    new: true,
-    runValidators: true,
-  });
-};
-
-// Tìm kiến User
-const search = (keyword) => {
-  User.find({
+// Tìm kiếm User theo keyword (Khớp với username hoặc displayName)
+export const search = (keyword, limit = 20) => {
+  return User.find({
     $or: [
-      {
-        username: {
-          $regex: keyword,
-          $options: "i",
-        },
-      },
-      {
-        displayName: {
-          $regex: keyword,
-          $options: "i",
-        },
-      },
+      { username: { $regex: keyword, $options: "i" } },
+      { displayName: { $regex: keyword, $options: "i" } },
     ],
-  }).limit(20);
+  })
+    .select("username displayName avatar status")
+    .limit(limit);
 };
 
-// Cập nhật trang thái online/offline của user
-export const updateStatusById = (id, status) => {
-  return User.findByIdAndUpdate(
-    id,
-    {
-      status,
-      lastSeen: status === "offline" ? new Date() : null,
-    },
-    { new: true },
-  );
+// Lấy danh sách User có phân trang, sắp xếp mới nhất lên đầu
+export const findAll = (page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+  return User.find().skip(skip).limit(limit).sort({ createdAt: -1 });
 };
 
-// Xoá user theo id
+// Đếm tổng số bản ghi khớp điều kiện
+export const count = (filter = {}) => {
+  return User.countDocuments(filter);
+};
+
+// ============================== 3. UPDATE ==============================
+
+// Cập nhật bất kỳ trường nào của User theo ID
+export const updateById = (id, data) => {
+  return User.findByIdAndUpdate(id, data, { new: true });
+};
+
+// Cập nhật riêng thông tin cá nhân (Profile)
+export const updateProfile = (id, data) => {
+  return User.findByIdAndUpdate(id, { $set: data }, { new: true });
+};
+
+// Cập nhật trạng thái Online/Offline và thời gian tương tác cuối
+
+export const updateStatusById = (id, { status, lastSeen }) => {
+  return User.findByIdAndUpdate(id, { status, lastSeen }, { new: true });
+};
+
+// Cập nhật mật khẩu băm mới
+export const updatePassword = (id, password) => {
+  return User.findByIdAndUpdate(id, { password }, { new: true });
+};
+
+// Đánh dấu email đã được xác minh
+export const markVerified = (id) => {
+  return User.findByIdAndUpdate(id, { isVerified: true }, { new: true });
+};
+
+// Khóa hoặc mở khóa tài khoản người dùng
+export const updateActiveStatus = (id, isActive) => {
+  return User.findByIdAndUpdate(id, { isActive }, { new: true });
+};
+
+// ============================== 4. DELETE ==============================
+
+// Xóa vĩnh viễn User theo ID
 export const deleteById = (id) => {
   return User.findByIdAndDelete(id);
 };
 
+// ============================== EXPORT DEFAULT ==============================
+
 export default {
   create,
+
   findById,
+  findByIdWithPassword,
+  findPublicById,
   findByUsername,
   findByEmail,
-  findPublicById,
-  findForAuth,
+  findByIdentifier,
   existsByUsername,
   existsByEmail,
-  updateById,
   search,
+  findAll,
+  count,
+
+  updateById,
+  updateProfile,
   updateStatusById,
+  updatePassword,
+  markVerified,
+  updateActiveStatus,
+
   deleteById,
 };

@@ -56,9 +56,16 @@ export const logout = asyncHandler(async (req, res) => {
   return ApiResponse.ok(res, "Logout successfully");
 });
 
+export const getMe = asyncHandler(async (req, res) => {
+  const user = await authService.getMe(req.user.id);
+
+  return ApiResponse.ok(res, "Gửi thông tin người dùng thành công", user);
+});
+
 export default {
   register,
   login,
   refresh,
   logout,
+  getMe,
 };

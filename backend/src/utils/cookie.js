@@ -2,10 +2,8 @@ import env from "../config/env.js";
 
 const isProduction = env.nodeEnv === "production";
 
-export const REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
-
 export const setRefreshTokenCookie = (res, refreshToken) => {
-  res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "none" : "lax",
@@ -13,7 +11,7 @@ export const setRefreshTokenCookie = (res, refreshToken) => {
   });
 };
 export const clearRefreshTokenCookie = (res) => {
-  res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
+  res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "none" : "lax",

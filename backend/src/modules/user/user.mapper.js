@@ -5,8 +5,6 @@ export const toUserResponse = (user) => {
   return {
     id: user._id.toString(),
     username: user.username,
-    email: user.email,
-    avatar: user.avatar,
     status: user.status,
     lastSeen: user.lastSeen,
     createdAt: user.createdAt,

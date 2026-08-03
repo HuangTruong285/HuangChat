@@ -51,3 +51,13 @@ export const deleteByToken = (token) => {
 export const deleteAllByUserId = (userId) => {
   return RefreshToken.deleteMany({ user: userId });
 };
+
+export default {
+  create,
+  findByToken,
+  findByUserId,
+  revokeByToken,
+  revokeAllByUserId,
+  deleteByToken,
+  deleteAllByUserId,
+};
