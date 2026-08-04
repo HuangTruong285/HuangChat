@@ -1,21 +1,27 @@
 import mongoose from "mongoose";
 
-const friendRequestSchema = new mongoose.Schema({
-  from: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+const friendRequestSchema = new mongoose.Schema(
+  {
+    from: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    to: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    message: {
+      type: String,
+      maxLength: 300,
+    },
   },
-  to: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+  {
+    timestamps: true,
+    versionKey: false,
   },
-  message: {
-    type: String,
-    maxLength: 300,
-  },
-});
+);
 
 friendRequestSchema.index({ from: 1, to: 1 }, { unique: true });
 friendRequestSchema.index({ from: 1 });
