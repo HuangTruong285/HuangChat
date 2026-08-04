@@ -1,4 +1,4 @@
-import RefreshToken from "./refreshToken.model.js";
+import Session from "./session.model.js";
 
 /*
   create: Tạo refresh token mới
@@ -10,54 +10,40 @@ import RefreshToken from "./refreshToken.model.js";
   deleteAllByUserId: Xoá tất cả refresh token của user
 */
 
-// Tạo refresh token mới
+// Tạo refresh token mới  (ĐÃ CHECK)
 export const create = (data) => {
-  return RefreshToken.create(data);
+  return Session.create(data);
 };
 
 // Tìm refresh token theo token
 export const findByToken = (token) => {
-  return RefreshToken.findOne({ token });
+  return Session.findOne({ token });
 };
 
 // Lấy tất cả refresh token của user
 export const findByUserId = (userId) => {
-  return RefreshToken.find({ user: userId });
+  return Session.find({ user: userId });
 };
 
 // Thu hồi refresh token
 export const revokeByToken = (token) => {
-  return RefreshToken.findOneAndUpdate(
-    { token },
-    { revoked: true },
-    { new: true },
-  );
+  return Session.findOneAndUpdate({ token }, { revoked: true }, { new: true });
 };
 
 // Thu hồi tất cả refresh token của user
 export const revokeAllByUserId = (userId) => {
-  return RefreshToken.updateMany(
+  return Session.updateMany(
     { user: userId, revoked: false },
     { revoked: true },
   );
 };
-
-// Xoá refresh token theo token
+// ============================== DELETE ==============================
+// Xoá refresh token theo token (ĐÃ CHECK)
 export const deleteByToken = (token) => {
-  return RefreshToken.findOneAndDelete({ token });
+  return Session.deleteOne({ hashedRefreshToken: token });
 };
 
 // Xoá tất cả refresh token của user
 export const deleteAllByUserId = (userId) => {
-  return RefreshToken.deleteMany({ user: userId });
-};
-
-export default {
-  create,
-  findByToken,
-  findByUserId,
-  revokeByToken,
-  revokeAllByUserId,
-  deleteByToken,
-  deleteAllByUserId,
+  return Session.deleteMany({ user: userId });
 };

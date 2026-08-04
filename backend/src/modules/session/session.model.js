@@ -7,15 +7,15 @@ import mongoose from "mongoose";
   revoked: Trạng thái của refresh token, nếu true thì refresh token đã bị thu hồi và không còn hợp lệ
 */
 
-const refreshTokenSchema = new mongoose.Schema(
+const sessionSchema = new mongoose.Schema(
   {
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
       index: true,
     },
-    token: {
+    hashedrefreshToken: {
       type: String,
       required: true,
       unique: true,
@@ -36,8 +36,8 @@ const refreshTokenSchema = new mongoose.Schema(
 );
 
 // MongoDB tự động xoá document khi hết hạn
-refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const RefreshToken = mongoose.model("RefreshToken", refreshTokenSchema);
+const Session = mongoose.model("Session", sessionSchema);
 
-export default RefreshToken;
+export default Session;

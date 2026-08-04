@@ -10,42 +10,92 @@ import mongoose from "mongoose";
     lastMessageAt: Thời gian tin nhắn cuối cùng
     
 */
+const participantSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    joinAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    _id: false, // Không cần id
+  },
+);
+
+const groupSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      trim: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const lastMessageSchema = new mongoose.Schema(
+  {
+    _id: { type: String },
+    content: {
+      type: String,
+      default: null,
+    },
+    senderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    createAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    _id: false,
+  },
+);
 
 const conversationSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ["private", "group"],
+      enum: ["direct", "group"],
+      required: true,
     },
-    member: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-
-    name: {
-      type: String,
-      default: null,
+    participants: {
+      type: [participantSchema],
+      required: true,
     },
-
-    avatar: {
-      type: String,
-      default: null,
-    },
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
+    group: {
+      type: groupSchema,
     },
     lastMessage: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: lastMessageSchema,
       ref: "Message",
       default: null,
     },
     lastMessageAt: {
       type: Date,
-      default: null,
+    },
+    seenBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    unReadCounts: {
+      type: Map,
+      of: Number,
+      default: {},
     },
   },
   {
@@ -55,7 +105,10 @@ const conversationSchema = new mongoose.Schema(
 );
 
 // Tối ưu tốc độ truy vấn danh sách cuộc trò chuyện của 1 user
-conversationSchema.index({ members: 1, lastMessageAt: -1 });
+conversationSchema.index({
+  "participant.userId": 1,
+  lastMessageAt: -1,
+});
 
 const Conversation = mongoose.model("Conversation", conversationSchema);
 

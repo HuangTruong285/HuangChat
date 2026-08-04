@@ -6,27 +6,38 @@ import {
   clearRefreshTokenCookie,
 } from "../../utils/cookie.js";
 
-import authService from "./auth.service.js";
+import * as authService from "./auth.service.js";
+import * as authMapper from "./auth.mapper.js";
 
-// Controller đăng ký tài khoản
+// ============================== REGISTER ==============================
 export const register = asyncHandler(async (req, res) => {
   const result = await authService.register(req.body);
 
   setRefreshTokenCookie(res, result.refreshToken);
 
-  return ApiResponse.created(res, "User registered successfully", result);
+  const responseData = authMapper.toAuthResponse(
+    result.user,
+    result.accessToken,
+  );
+
+  return ApiResponse.created(res, "User registered successfully", responseData);
 });
 
-// Controller đăng nhập
+// ============================== Login ==============================
 export const login = asyncHandler(async (req, res) => {
   const result = await authService.login(req.body);
 
   setRefreshTokenCookie(res, result.refreshToken);
 
-  return ApiResponse.ok(res, "User logged in successfully", result);
+  const responseData = authMapper.toAuthResponse(
+    result.user,
+    result.accessToken,
+  );
+
+  return ApiResponse.ok(res, "User logged in successfully", responseData);
 });
 
-// Controller làm mới access token bằng refresh token
+// ============================== REFRESH ==============================
 export const refresh = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
@@ -38,10 +49,16 @@ export const refresh = asyncHandler(async (req, res) => {
 
   setRefreshTokenCookie(res, result.refreshToken);
 
-  return ApiResponse.ok(res, "Access token refreshed successfully", result);
+  const responseData = authMapper.toRefreshResponse(result.newAccessToken);
+
+  return ApiResponse.ok(
+    res,
+    "Access token refreshed successfully",
+    responseData,
+  );
 });
 
-// Controller đăng xuất
+// ============================== LOGOUT ==============================
 export const logout = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
@@ -55,17 +72,3 @@ export const logout = asyncHandler(async (req, res) => {
 
   return ApiResponse.ok(res, "Logout successfully");
 });
-
-export const getMe = asyncHandler(async (req, res) => {
-  const user = await authService.getMe(req.user.id);
-
-  return ApiResponse.ok(res, "Gửi thông tin người dùng thành công", user);
-});
-
-export default {
-  register,
-  login,
-  refresh,
-  logout,
-  getMe,
-};

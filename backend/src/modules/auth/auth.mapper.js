@@ -1,21 +1,14 @@
 import { userMapper } from "../user/index.js";
 
-export const toAuthResponse = (user, accessToken, refreshToken) => {
+export const toAuthResponse = (user, accessToken) => {
   return {
     accessToken,
-    refreshToken,
     user: userMapper.toUserResponse(user),
   };
 };
 
-export const toRefreshResponse = (accessToken, refreshToken) => {
+export const toRefreshResponse = (accessToken) => {
   return {
     accessToken,
-    refreshToken,
   };
-};
-
-export default {
-  toAuthResponse,
-  toRefreshResponse,
 };

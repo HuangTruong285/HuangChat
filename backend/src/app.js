@@ -7,6 +7,7 @@ import env from "./config/env.js";
 import authRoutes from "./modules/auth/index.js";
 import userRoutes from "./modules/user/index.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
+import authMiddleware from "./middleware/auth.middleware.js";
 
 const app = express();
 
@@ -35,8 +36,11 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-// Routes chính
+// Public Route
 app.use("/v1/api/auth", authRoutes);
+
+app.use(authMiddleware);
+// Private Route
 app.use("/v1/api/users", userRoutes);
 
 /* --------------------------- Error handling {last} ------------------------- */

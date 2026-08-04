@@ -2,21 +2,21 @@ import User from "./user.model.js";
 
 // ============================== 1. CREATE ==============================
 
-//Tạo một User mới trong CSDL
+//Tạo một User mới trong CSDL           (ĐÃ CHECK)
 export const create = (data) => {
   return User.create(data);
 };
 
 // ============================== 2. READ / FIND ==============================
 
-// Tìm User theo ID (Mặc định ẩn password)
+// Tìm User theo ID (ẩn password)      (ĐÃ CHECK)
 export const findById = (id) => {
-  return User.findById(id);
+  return User.findById(id).select("-hashedPassword");
 };
 
 // Tìm User theo ID và LẤY KÈM password (Dùng cho xác thực/đổi mật khẩu)
 export const findByIdWithPassword = (id) => {
-  return User.findById(id).select("+password");
+  return User.findById(id);
 };
 
 // Lấy thông tin công khai của User (Thích hợp cho Profile public)
@@ -26,29 +26,29 @@ export const findPublicById = (id) => {
   );
 };
 
-// Tìm User theo Username
+// Tìm User theo Username                 (ĐÃ CHECK)
 export const findByUsername = (username) => {
   return User.findOne({ username });
 };
 
-// Tìm User theo Email
+// Tìm User theo Email                   (ĐÃ CHECK)
 export const findByEmail = (email) => {
   return User.findOne({ email });
 };
 
-// Tìm User bằng Username HOẶC Email + lấy kèm password (Dùng cho Đăng nhập)
+// Tìm User bằng Username HOẶC Email + lấy kèm password (Dùng cho Đăng nhập)      (ĐÃ CHECK)
 export const findByIdentifier = (identifier) => {
   return User.findOne({
     $or: [{ username: identifier }, { email: identifier }],
-  }).select("+password");
+  });
 };
 
-// Kiểm tra xem Username đã tồn tại chưa (Trả về {_id} hoặc null)
+// Kiểm tra xem Username đã tồn tại chưa (Trả về {_id} hoặc null)     (ĐÃ CHECK)
 export const existsByUsername = (username) => {
   return User.exists({ username });
 };
 
-// Kiểm tra xem Email đã tồn tại chưa (Trả về {_id} hoặc null)
+// Kiểm tra xem Email đã tồn tại chưa (Trả về {_id} hoặc null)        (ĐÃ CHECK)
 export const existsByEmail = (email) => {
   return User.exists({ email });
 };

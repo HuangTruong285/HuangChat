@@ -7,10 +7,11 @@ import {
 } from "../../utils/refreshToken.js";
 
 import { userMapper, userRepository } from "../user/index.js";
-import { refreshTokenRepository } from "../refreshToken/index.js";
-import authMapper from "./auth.mapper.js";
+import * as sessionRepository from "../session/index.js";
 
-// Đăng ký tài khoản mới
+import * as authMapper from "./auth.mapper.js";
+
+// ============================== REGISTER ==============================
 export const register = async ({ username, email, password }) => {
   // Kiểm tra username đã tồn tại chưa
   const existingUserName = await userRepository.existsByUsername(username);
@@ -31,7 +32,8 @@ export const register = async ({ username, email, password }) => {
   const user = await userRepository.create({
     username,
     email,
-    password: hashedPassword,
+    hashedPassword: hashedPassword,
+    displayName: username,
   });
 
   // Tạo Access Token
@@ -44,15 +46,20 @@ export const register = async ({ username, email, password }) => {
   const hashedRefreshToken = await hashRefreshToken(refreshToken);
 
   // Lưu Refresh Token vào DB
-  await refreshTokenRepository.create({
-    user: user._id,
-    token: hashedRefreshToken,
+  await sessionRepository.create({
+    userId: user._id,
+    hashedRefreshToken: hashedRefreshToken,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 ngày
   });
 
-  return authMapper.toAuthResponse(user, accessToken, refreshToken);
+  return {
+    user,
+    accessToken,
+    refreshToken,
+  };
 };
 
+// ============================== LOGIN ==============================
 export const login = async ({ identifier, password }) => {
   // Tìm user theo username hoặc email
   const user = await userRepository.findByIdentifier(identifier);
@@ -61,7 +68,7 @@ export const login = async ({ identifier, password }) => {
   }
 
   // So sánh mật khẩu
-  const isMatch = await comparePassword(password, user.password);
+  const isMatch = await comparePassword(password, user.hashedPassword);
   if (!isMatch) {
     throw ApiError.unauthorized("Invalid username or password");
   }
@@ -76,22 +83,27 @@ export const login = async ({ identifier, password }) => {
   const hashedRefreshToken = await hashRefreshToken(refreshToken);
 
   // Lưu Refresh Token vào DB
-  await refreshTokenRepository.create({
-    user: user._id,
-    token: hashedRefreshToken,
+  await sessionRepository.create({
+    userId: user._id,
+    hashedRefreshToken: hashedRefreshToken,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 ngày
   });
 
-  return authMapper.toAuthResponse(user, accessToken, refreshToken);
+  return {
+    user,
+    accessToken,
+    refreshToken,
+  };
 };
 
+// ============================== REFRESH ==============================
 export const refresh = async (refreshToken) => {
   // Hash Refresh Token trước khi tìm kiếm trong DB
   const hashedRefreshToken = await hashRefreshToken(refreshToken);
 
   // Tìm Refresh Token trong DB
   const storedRefreshToken =
-    await refreshTokenRepository.findByToken(hashedRefreshToken);
+    await sessionRepository.findByToken(hashedRefreshToken);
 
   // Nếu không tìm thấy hoặc Refresh Token đã bị thu hồi, trả về lỗi
   if (!storedRefreshToken || storedRefreshToken.revoked) {
@@ -104,16 +116,14 @@ export const refresh = async (refreshToken) => {
   }
 
   // Rotation: xoá Refresh Token cũ
-  await refreshTokenRepository.deleteByToken(hashedRefreshToken);
-
+  await sessionRepository.deleteByToken(hashedRefreshToken);
   // Tạo Refresh Token mới
   const newRefreshToken = generateRefreshToken();
-
   // Lưu Refresh Token mới vào DB
   const hashedNewRefreshToken = await hashRefreshToken(newRefreshToken);
-  await refreshTokenRepository.create({
-    user: storedRefreshToken.user,
-    token: hashedNewRefreshToken,
+  await sessionRepository.create({
+    userId: storedRefreshToken.user,
+    hashRefreshToken: hashedNewRefreshToken,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 ngày
   });
 
@@ -121,41 +131,17 @@ export const refresh = async (refreshToken) => {
   const newAccessToken = generateAccessToken(storedRefreshToken.user);
 
   // Trả về response với Access Token mới
-  return authMapper.toRefreshResponse(newAccessToken, newRefreshToken);
+  return {
+    newAccessToken,
+    newRefreshToken,
+  };
 };
 
+// ============================== LOGOUT ==============================
 export const logout = async (refreshToken) => {
   // Hash Refresh Token trước khi tìm kiếm trong DB
   const hashedRefreshToken = await hashRefreshToken(refreshToken);
 
-  // Tìm Refresh Token trong DB
-  const storedRefreshToken =
-    await refreshTokenRepository.findByToken(hashedRefreshToken);
-
-  // Nếu không tìm thấy hoặc Refresh Token đã bị thu hồi, trả về lỗi
-  if (!storedRefreshToken || storedRefreshToken.revoked) {
-    throw ApiError.unauthorized("Invalid refresh token");
-  }
-
   // Xoá Refresh Token khỏi DB
-  await refreshTokenRepository.deleteByToken(hashedRefreshToken);
-};
-
-export const getMe = async (userId) => {
-  // Tìm user
-  const user = await userRepository.findById(userId);
-
-  if (!user) {
-    throw ApiError.notFound("User not found");
-  }
-
-  return userMapper.toUserResponse(user);
-};
-
-export default {
-  register,
-  login,
-  refresh,
-  logout,
-  getMe,
+  await sessionRepository.deleteByToken(hashedRefreshToken);
 };

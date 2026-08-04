@@ -13,12 +13,13 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
-    conversation: {
+    conversationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Conversation",
+      required: true,
       index: true,
     },
-    sender: {
+    senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
@@ -29,7 +30,11 @@ const messageSchema = new mongoose.Schema(
     },
     content: {
       type: String,
+      trim: true,
       default: null,
+    },
+    imgUrl: {
+      type: String,
     },
     replyTo: {
       type: mongoose.Schema.Types.ObjectId,
