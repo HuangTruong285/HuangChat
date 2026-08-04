@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import env from "./config/env.js";
 import authRoutes from "./modules/auth/index.js";
 import userRoutes from "./modules/user/index.js";
+import friendRoutes from "./modules/friend/index.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
 import authMiddleware from "./middleware/auth.middleware.js";
 
@@ -42,6 +43,7 @@ app.use("/v1/api/auth", authRoutes);
 app.use(authMiddleware);
 // Private Route
 app.use("/v1/api/users", userRoutes);
+app.use("/v1/api/friends", friendRoutes);
 
 /* --------------------------- Error handling {last} ------------------------- */
 // Bắt các route không tồn tại (Lỗi 404)
