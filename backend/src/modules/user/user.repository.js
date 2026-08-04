@@ -26,14 +26,14 @@ export const findPublicById = (id) => {
   );
 };
 
-// Tìm User theo Username                 (ĐÃ CHECK)
+// Tìm User theo Username (ẩn mật khẩu)               (ĐÃ CHECK)
 export const findByUsername = (username) => {
-  return User.findOne({ username });
+  return User.findOne({ username }).select("-hashedPassword");
 };
 
-// Tìm User theo Email                   (ĐÃ CHECK)
+// Tìm User theo Email (ẩn mật khẩu)              (ĐÃ CHECK)
 export const findByEmail = (email) => {
-  return User.findOne({ email });
+  return User.findOne({ email }).select("-hashedPassword");
 };
 
 // Tìm User bằng Username HOẶC Email + lấy kèm password (Dùng cho Đăng nhập)      (ĐÃ CHECK)
@@ -114,31 +114,4 @@ export const updateActiveStatus = (id, isActive) => {
 // Xóa vĩnh viễn User theo ID
 export const deleteById = (id) => {
   return User.findByIdAndDelete(id);
-};
-
-// ============================== EXPORT DEFAULT ==============================
-
-export default {
-  create,
-
-  findById,
-  findByIdWithPassword,
-  findPublicById,
-  findByUsername,
-  findByEmail,
-  findByIdentifier,
-  existsByUsername,
-  existsByEmail,
-  search,
-  findAll,
-  count,
-
-  updateById,
-  updateProfile,
-  updateStatusById,
-  updatePassword,
-  markVerified,
-  updateActiveStatus,
-
-  deleteById,
 };

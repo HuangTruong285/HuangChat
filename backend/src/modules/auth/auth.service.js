@@ -6,21 +6,30 @@ import {
   hashRefreshToken,
 } from "../../utils/refreshToken.js";
 
-import { userMapper, userRepository } from "../user/index.js";
-import * as sessionRepository from "../session/index.js";
+import { userRepository } from "../user/index.js";
+import { sessionRepository } from "../session/index.js";
 
-import * as authMapper from "./auth.mapper.js";
+// Hằng số thời gian sống của Refresh Token (7 ngày)
+const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
+
+// Helper xóa dữ liệu nhạy cảm (hashedPassword) trước khi return
+const sanitizeUser = (user) => {
+  const userObj = user.toObject ? user.toObject() : { ...user };
+  delete userObj.hashedPassword;
+  return userObj;
+};
 
 // ============================== REGISTER ==============================
 export const register = async ({ username, email, password }) => {
-  // Kiểm tra username đã tồn tại chưa
-  const existingUserName = await userRepository.existsByUsername(username);
+  // Kiểm tra username & email song song để tối ưu tốc độ
+  const [existingUserName, existingUserEmail] = await Promise.all([
+    userRepository.existsByUsername(username),
+    userRepository.existsByEmail(email),
+  ]);
+
   if (existingUserName) {
     throw ApiError.conflict("Username already exists");
   }
-
-  // Kiểm tra email đã tồn tại chưa
-  const existingUserEmail = await userRepository.existsByEmail(email);
   if (existingUserEmail) {
     throw ApiError.conflict("Email already exists");
   }
@@ -32,24 +41,22 @@ export const register = async ({ username, email, password }) => {
   const user = await userRepository.create({
     username,
     email,
-    hashedPassword: hashedPassword,
+    hashedPassword,
     displayName: username,
   });
 
-  // Tạo Access Token
+  // Access Token
   const accessToken = generateAccessToken(user._id);
 
-  // Tạo Refresh Token
+  // Refresh Token
   const refreshToken = generateRefreshToken();
-
-  // Hash Refresh Token trước khi lưu vào DB
   const hashedRefreshToken = await hashRefreshToken(refreshToken);
 
   // Lưu Refresh Token vào DB
   await sessionRepository.create({
     userId: user._id,
-    hashedRefreshToken: hashedRefreshToken,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 ngày
+    hashedRefreshToken,
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
   });
 
   return {
@@ -73,24 +80,22 @@ export const login = async ({ identifier, password }) => {
     throw ApiError.unauthorized("Invalid username or password");
   }
 
-  // Tạo Access Token
+  // Access Token
   const accessToken = generateAccessToken(user._id);
 
-  // Tạo Refresh Token
+  // Refresh Token
   const refreshToken = generateRefreshToken();
-
-  // Hash Refresh Token trước khi lưu vào DB
   const hashedRefreshToken = await hashRefreshToken(refreshToken);
 
   // Lưu Refresh Token vào DB
   await sessionRepository.create({
     userId: user._id,
-    hashedRefreshToken: hashedRefreshToken,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 ngày
+    hashedRefreshToken,
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
   });
 
   return {
-    user,
+    user: sanitizeUser(user),
     accessToken,
     refreshToken,
   };
@@ -102,16 +107,15 @@ export const refresh = async (refreshToken) => {
   const hashedRefreshToken = await hashRefreshToken(refreshToken);
 
   // Tìm Refresh Token trong DB
-  const storedRefreshToken =
-    await sessionRepository.findByToken(hashedRefreshToken);
+  const session = await sessionRepository.findByToken(hashedRefreshToken);
 
   // Nếu không tìm thấy hoặc Refresh Token đã bị thu hồi, trả về lỗi
-  if (!storedRefreshToken || storedRefreshToken.revoked) {
+  if (!session || session.revoked) {
     throw ApiError.unauthorized("Invalid refresh token");
   }
 
   // Nếu Refresh Token đã hết hạn, trả về lỗi
-  if (storedRefreshToken.expiresAt < new Date()) {
+  if (session.expiresAt < new Date()) {
     throw ApiError.unauthorized("Refresh token has expired");
   }
 
@@ -122,18 +126,18 @@ export const refresh = async (refreshToken) => {
   // Lưu Refresh Token mới vào DB
   const hashedNewRefreshToken = await hashRefreshToken(newRefreshToken);
   await sessionRepository.create({
-    userId: storedRefreshToken.user,
-    hashRefreshToken: hashedNewRefreshToken,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 ngày
+    userId: session.user,
+    hashedRefreshToken: hashedNewRefreshToken,
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
   });
 
   // Tao Access Token mới
-  const newAccessToken = generateAccessToken(storedRefreshToken.user);
+  const newAccessToken = generateAccessToken(session.user);
 
   // Trả về response với Access Token mới
   return {
-    newAccessToken,
-    newRefreshToken,
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
   };
 };
 

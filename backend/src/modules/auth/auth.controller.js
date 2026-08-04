@@ -49,7 +49,7 @@ export const refresh = asyncHandler(async (req, res) => {
 
   setRefreshTokenCookie(res, result.refreshToken);
 
-  const responseData = authMapper.toRefreshResponse(result.newAccessToken);
+  const responseData = authMapper.toRefreshResponse(result.accessToken);
 
   return ApiResponse.ok(
     res,
@@ -63,10 +63,8 @@ export const logout = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
-    throw ApiError.unauthorized("Refresh token is required");
+    await authService.logout(refreshToken);
   }
-
-  await authService.logout(refreshToken);
 
   clearRefreshTokenCookie(res);
 

@@ -25,15 +25,26 @@ if (!allowedEnvs.includes(nodeEnv)) {
   throw new Error(`❌ NODE_ENV không hợp lệ: ${nodeEnv}`);
 }
 
-// Chuyển PORT sang số nguyên
+// Chuyển PORT sang số nguyên và kiểm tra khoảng hợp lệ
 const parsedPort = Number.parseInt(process.env.PORT || "5000", 10);
+const port =
+  !Number.isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535
+    ? parsedPort
+    : 5000;
+// Chuyển REFRESH_TOKEN_TTL sang số nguyên (mặc định 7 ngày tính bằng ms)
+const parsedRefreshTTL = Number.parseInt(
+  process.env.REFRESH_TOKEN_TTL || "604800000",
+  10,
+);
+// Chuyển SALT_ROUNDS sang số nguyên
+const parsedSaltRounds = Number.parseInt(process.env.SALT_ROUNDS || "12", 10);
 
 // Tạo object chứa cấu hình môi trường
 const env = {
-  port: Number.isNaN(parsedPort) ? 5000 : parsedPort, // Cổng server
+  port,
   nodeEnv,
-  isDev: nodeEnv === "development", // Có phải môi trường dev không
-  isProd: nodeEnv === "production", // Có phải môi trường prod không
+  isDev: nodeEnv === "development",
+  isProd: nodeEnv === "production",
 
   // URL frontend cho phép truy cập
   clientUrl:
@@ -51,14 +62,21 @@ const env = {
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN?.trim() || "15m",
   },
 
+  // Đã sửa tên biến REFRESH_TOKEN_TTL và ép kiểu number
+  refreshTokenTTL: Number.isNaN(parsedRefreshTTL)
+    ? 604800000
+    : parsedRefreshTTL,
+
+  // Đã ép kiểu number
   bcrypt: {
-    saltRounds: process.env.SALT_ROUNDS || 12,
+    saltRounds: Number.isNaN(parsedSaltRounds) ? 12 : parsedSaltRounds,
   },
 };
 
-// Ngăn thay đổi object cấu hình sau này
-Object.freeze(env);
+// Đóng đóng toàn bộ các object con và object chính
 Object.freeze(env.mongoDB);
 Object.freeze(env.jwt);
+Object.freeze(env.bcrypt);
+Object.freeze(env);
 
 export default env;
