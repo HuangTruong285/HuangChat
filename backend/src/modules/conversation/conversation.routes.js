@@ -10,7 +10,7 @@ router.post("/group", conversationController.createGroupConversation);
 
 router.get("/", conversationController.getMyConversations);
 
-router.get("/:conversationId", conversationController.getConversationById);
+router.get("/:conversationId", conversationController.getConversation);
 
 router.post(
   "/:conversationId/participants",

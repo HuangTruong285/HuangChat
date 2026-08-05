@@ -3,21 +3,21 @@ import * as messageService from "./message.service.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
-const sendMessage = asyncHandler(async (req, res) => {
+// ============================== SEND MESSAGE ==============================
+export const sendMessage = asyncHandler(async (req, res) => {
   const message = await messageService.sendMessage({
     conversationId: req.body.conversationId,
-    senderId: req.user.id,
+    senderId: req.userId,
     type: req.body.type,
     content: req.body.content,
     imgUrl: req.body.imgUrl,
   });
 
-  return res
-    .status(201)
-    .json(new ApiResponse(201, message, "Message sent successfully"));
+  return ApiResponse.created(res, "Message sent successfully", message);
 });
 
-const getMessages = asyncHandler(async (req, res) => {
+// ============================== GET MESSAGE ==============================
+export const getMessages = asyncHandler(async (req, res) => {
   const { conversationId } = req.params;
 
   const { page = 1, limit = 30 } = req.query;
@@ -27,17 +27,14 @@ const getMessages = asyncHandler(async (req, res) => {
     limit: Number(limit),
   });
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, messages, "Messages retrieved successfully"));
+  return ApiResponse.ok(res, "Messages retrieved successfully", messages);
 });
 
-const deleteMessage = asyncHandler(async (req, res) => {
+// ============================== DELETE MESSAGE ==============================
+export const deleteMessage = asyncHandler(async (req, res) => {
   const { messageId } = req.params;
 
   await messageService.deleteMessage(messageId);
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, null, "Message deleted successfully"));
+  return ApiResponse.ok(res, "Message deleted successfully");
 });

@@ -4,7 +4,7 @@ import { conversationRepository } from "../conversation/index.js";
 import ApiError from "../../utils/ApiError.js";
 
 // ============================== SEND MESSAGE ==============================
-const sendMessage = async ({
+export const sendMessage = async ({
   conversationId,
   senderId,
   type = "text",
@@ -53,7 +53,7 @@ const sendMessage = async ({
         : (conversation.unreadCounts.get(id) || 0) + 1;
   });
 
-  //
+  // Cập nhật thông tin những người đã xem tin nhắn này vào cuộc trò chuyện
   await conversationRepository.updateById(conversationId, {
     seenBy: [senderId],
     unreadCounts,
@@ -62,9 +62,14 @@ const sendMessage = async ({
   return message;
 };
 
-const getMessages = async (conversationId, { page = 1, limit = 30 } = {}) => {
+// ============================== GET MESSAGE ==============================
+// Lấy tin nhắn từ cuộc hội thoại (phân trang)
+export const getMessages = async (
+  conversationId,
+  { page = 1, limit = 30 } = {},
+) => {
+  // Kiêmt tra xem cuộc trò chuyện có tồn tại
   const conversation = await conversationRepository.findById(conversationId);
-
   if (!conversation) {
     throw new ApiError(404, "Conversation not found");
   }
@@ -75,14 +80,17 @@ const getMessages = async (conversationId, { page = 1, limit = 30 } = {}) => {
   });
 };
 
-const deleteMessage = async (messageId) => {
+// ============================== SEND MESSAGE ==============================
+// Xoá tin nhắn
+export const deleteMessage = async (messageId) => {
+  // Kiểm tra tin nhắn có tồn tại không
   const message = await messageRepository.findById(messageId);
-
   if (!message) {
     throw new ApiError(404, "Message not found");
   }
 
+  // Xoá tin nhắn
   await messageRepository.deleteById(messageId);
 
-  return true;
+  return;
 };

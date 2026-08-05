@@ -6,7 +6,7 @@ const router = Router();
 
 router.post("/", messageController.sendMessage);
 
-router.get("/conversation/:conversationId", messageController.getMessages);
+router.get("/:conversationId", messageController.getMessages);
 
 router.delete("/:messageId", messageController.deleteMessage);
 

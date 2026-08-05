@@ -1,9 +1,13 @@
 import Message from "./message.model.js";
 
+// ============================== DELETE ==============================
+
 // Tạo một message
 const create = (messageData) => {
   return Message.create(messageData);
 };
+
+// ============================== READ / FIND ==============================
 
 // Tìm tin nhắn theo id tin nhắn
 const findById = (messageId) => {
@@ -18,15 +22,22 @@ const findByConversation = (conversationId, { page = 1, limit = 30 } = {}) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .populate("senderId", "displayName avatarURL");
+    .populate("senderId", "displayName avatarUrl");
 };
 
 // Lấy tin nhắn mới nhất của một cuộc trò chuyện
 const findLatestByConversation = (conversationId) => {
   return Message.findOne({ conversationId })
     .sort({ createdAt: -1 })
-    .populate("senderId", "displayName avatarURL");
+    .populate("senderId", "displayName avatarUrl");
 };
+
+// Đếm tổng số tin nhắn có trong cuộc trò chuyện này
+const countByConversation = (conversationId) => {
+  return Message.countDocuments({ conversationId });
+};
+
+// ============================== UPDATE ==============================
 
 // Cập nhật thông tin tin nhắn
 const updateById = (messageId, data) => {
@@ -36,12 +47,9 @@ const updateById = (messageId, data) => {
   });
 };
 
+// ============================== DELETE ==============================
+
 // Xoá tin nhắn theo id message
 const deleteById = (messageId) => {
   return Message.findByIdAndDelete(messageId);
-};
-
-// Đếm tổng số tin nhắn có trong cuộc trò chuyện này
-const countByConversation = (conversationId) => {
-  return Message.countDocuments({ conversationId });
 };

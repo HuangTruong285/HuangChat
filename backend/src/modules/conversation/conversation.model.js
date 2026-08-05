@@ -29,7 +29,7 @@ const groupSchema = new mongoose.Schema(
       trim: true,
     },
     // Đường dẫn ảnh đại diện
-    avatar: {
+    avatarUrl: {
       type: String,
       default: "",
     },
@@ -49,8 +49,7 @@ const lastMessageSchema = new mongoose.Schema(
   {
     // ID tin nhắn cuối
     _id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Message",
+      type: String,
     },
     // Nội dung tin nhắn
     content: {

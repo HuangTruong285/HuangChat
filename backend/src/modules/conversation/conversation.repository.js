@@ -1,15 +1,19 @@
 import Conversation from "./conversation.model.js";
 
+// ============================== CREATE ==============================
+
 // Tạo một cuộc trò chuyện mới
-const create = (conversationData) => {
-  return Conversation.create(conversationData);
+const create = (data) => {
+  return Conversation.create(data);
 };
+
+// ============================== READ / FIND ==============================
 
 // TÌm cuộc trò chuyện theo ID
 const findById = (conversationId) => {
   return Conversation.findById(conversationId)
-    .populate("participants.userId", "displayName avatarURL")
-    .populate("group.createdBy", "displayName avatarURL");
+    .populate("participants.userId", "displayName avatarUrl")
+    .populate("group.createdBy", "displayName avatarUrl");
 };
 
 // Tìm cuộc trò chuyện 1-1 giữa hai người cụ thể
@@ -28,8 +32,10 @@ const findByUser = (userId) => {
     "participants.userId": userId,
   })
     .sort({ lastMessageAt: -1 })
-    .populate("participants.userId", "displayName avatarURL");
+    .populate("participants.userId", "displayName avatarUrl");
 };
+
+// ============================== UPDATE ==============================
 
 // Cập nhật thông tin
 const updateById = (conversationId, data) => {
@@ -116,6 +122,8 @@ const clearSeenBy = (conversationId) => {
     },
   );
 };
+
+// ============================== DELETE ==============================
 
 // Xoá cuộc trò chuyện
 const deleteById = (conversationId) => {
