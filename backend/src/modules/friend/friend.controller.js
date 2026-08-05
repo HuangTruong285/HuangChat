@@ -3,10 +3,10 @@ import ApiResponse from "../../utils/ApiResponse.js";
 
 import * as friendService from "./friend.service.js";
 
-// Gửi lời mời kết bạn
+// ============================== SEND REQUEST ==============================
 export const sendRequest = asyncHandler(async (req, res) => {
   const friendRequest = await friendService.sendRequest(
-    req.user.id,
+    req.userId,
     req.body.to,
     req.body.message,
   );
@@ -18,47 +18,47 @@ export const sendRequest = asyncHandler(async (req, res) => {
   );
 });
 
-// Chấp nhận lời mời
+// ============================== ACCEPT REQUEST ==============================
 export const acceptRequest = asyncHandler(async (req, res) => {
   const friend = await friendService.acceptRequest(
     req.params.requestId,
-    req.user.id,
+    req.userId,
   );
 
   return ApiResponse.ok(res, "Friend request accepted", friend);
 });
 
-// Từ chối lời mời
+// ============================== REJECT REQUEST ==============================
 export const rejectRequest = asyncHandler(async (req, res) => {
-  await friendService.rejectRequest(req.params.requestId, req.user.id);
+  await friendService.rejectRequest(req.params.requestId, req.userId);
 
   return ApiResponse.ok(res, "Friend request accepted.");
 });
 
-// Huỷ lời mời đã gửi
+// ============================== CANCEL REQUEST ==============================
 export const cancelRequest = asyncHandler(async (req, res) => {
-  await friendService.cancelRequest(req.params.requestId, req.user.id);
+  await friendService.cancelRequest(req.params.requestId, req.userId);
 
   return ApiResponse.ok(res, "Friend request canceled.");
 });
 
-// Hủy kết bạn
+// ============================== UNFRIEND ==============================
 export const unfriend = asyncHandler(async (req, res) => {
-  await friendService.unfriend(req.user.id, req.params.friendId);
+  await friendService.unfriend(req.userId, req.params.friendId);
 
   return ApiResponse.ok(res, "Unfriended successfully.");
 });
 
-// Danh sách bạn bè
+// ============================== GET FRIEND LIST ==============================
 export const getFriends = asyncHandler(async (req, res) => {
-  const friends = await friendService.getFriends(req.user.id);
+  const friends = await friendService.getFriends(req.userId);
 
   return ApiResponse.ok(res, "Lấy danh sách bạn bè thành công", friends);
 });
 
-// Danh sách lời mời đã nhận
+// ============================== GET RECEIVED REQUEST LIST ==============================
 export const getReceivedRequests = asyncHandler(async (req, res) => {
-  const requests = await friendService.getReceivedRequests(req.user.id);
+  const requests = await friendService.getReceivedRequests(req.userId);
 
   return ApiResponse.ok(
     res,
@@ -67,9 +67,9 @@ export const getReceivedRequests = asyncHandler(async (req, res) => {
   );
 });
 
-// Danh sách lời mời đã gửi
+// ============================== GET SENT REQUEST LIST ==============================
 export const getSentRequests = asyncHandler(async (req, res) => {
-  const requests = await friendService.getSentRequests(req.user.id);
+  const requests = await friendService.getSentRequests(req.userId);
 
   return ApiResponse.ok(
     res,

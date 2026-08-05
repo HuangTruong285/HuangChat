@@ -1,13 +1,13 @@
 import User from "./user.model.js";
 
-// ============================== 1. CREATE ==============================
+// ============================== CREATE ==============================
 
 //Tạo một User mới
 export const create = (data) => {
   return User.create(data);
 };
 
-// ============================== 2. READ / FIND ==============================
+// ============================== READ / FIND ==============================
 
 // Tìm User theo ID
 export const findById = (id) => {
@@ -69,7 +69,7 @@ export const count = (filter = {}) => {
   return User.countDocuments(filter);
 };
 
-// ============================== 3. UPDATE ==============================
+// ============================== UPDATE ==============================
 
 // Cập nhật bất kỳ trường nào của User theo ID
 export const updateById = (id, data) => {
@@ -102,7 +102,7 @@ export const updatePassword = (id, hashedPassword) => {
   return User.findByIdAndUpdate(id, { hashedPassword }, { new: true });
 };
 
-// ============================== 4. DELETE ==============================
+// ============================== DELETE ==============================
 
 // Xóa vĩnh viễn User theo ID
 export const deleteById = (id) => {

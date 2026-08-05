@@ -1,18 +1,17 @@
 import FriendRequest from "./friendRequest.model.js";
 
+// ============================== CREATE ==============================
+
 // Tạo lời mời
 export const create = (data) => {
   return FriendRequest.create(data);
 };
 
+// ============================== READ / FIND ==============================
+
 // Tìm theo id
 export const findById = (id) => {
   return FriendRequest.findById(id);
-};
-
-// Xóa lời mời
-export const deleteById = (id) => {
-  return FriendRequest.findByIdAndDelete(id);
 };
 
 // Tìm lời mời giữa 2 user
@@ -59,4 +58,11 @@ export const countSentRequests = (userId) => {
   return FriendRequest.countDocuments({
     from: userId,
   });
+};
+
+// ============================== DELETE ==============================
+
+// Xóa lời mời
+export const deleteById = (id) => {
+  return FriendRequest.findByIdAndDelete(id);
 };

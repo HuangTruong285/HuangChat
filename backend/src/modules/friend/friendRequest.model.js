@@ -2,16 +2,19 @@ import mongoose from "mongoose";
 
 const friendRequestSchema = new mongoose.Schema(
   {
+    // Lời mờI kết bạn từ ai
     from: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+    // Lời mời kết bạn đến ai
     to: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+    // Lời nhắn kèm theo
     message: {
       type: String,
       maxLength: 300,

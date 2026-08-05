@@ -4,7 +4,7 @@ import { userRepository } from "../user/index.js";
 import * as friendRepository from "./friend.repository.js";
 import * as friendRequestRepository from "./friendRequest.repository.js";
 
-// Gửi lời mời kêt bạn
+// ============================== SEND REQUEST ==============================
 export const sendRequest = async ({ from, to, message = "" }) => {
   // Tránh gửi cho chính mình
   if (from === to) {
@@ -42,7 +42,7 @@ export const sendRequest = async ({ from, to, message = "" }) => {
   return friendRequest;
 };
 
-// Chấp nhận lời mời
+// ============================== ACCEPT REQUEST ==============================
 export const acceptRequest = async (requestId, userId) => {
   // Kiểm tra xem lời mời kết bạn đó còn hay không
   const request = await friendRequestRepository.findById(requestId);
@@ -73,7 +73,7 @@ export const acceptRequest = async (requestId, userId) => {
   return friend;
 };
 
-// Từ chối lời mời
+// ============================== REJECT REQUEST ==============================
 export const rejectRequest = async (requestId, userId) => {
   // Kiểm tra xem lời mời kết bạn đó còn hay không
   const request = await friendRequestRepository.findById(requestId);
@@ -90,7 +90,7 @@ export const rejectRequest = async (requestId, userId) => {
   await friendRequestRepository.deleteById(requestId);
 };
 
-// Huỷ lời mời đã gửi
+// ============================== CANCEL REQUEST ==============================
 export const cancelRequest = async (requestId, userId) => {
   // Kiểm tra xem lời mời kết bạn đó còn hay không
   const request = await friendRequestRepository.findById(requestId);
@@ -107,7 +107,7 @@ export const cancelRequest = async (requestId, userId) => {
   await friendRequestRepository.deleteById(requestId);
 };
 
-// Huỷ kết bạn
+// ============================== UNFRIEND ==============================
 export const unfriend = async (userId, friendId) => {
   // Kiểm tra xem mình có là bạn với người mình muốn huỷ kết bạn không
   const friend = await friendRepository.findFriend(userId, friendId);
@@ -119,17 +119,17 @@ export const unfriend = async (userId, friendId) => {
   await friendRepository.deleteById(friend._id);
 };
 
-// Danh sách bạn bè
+// ============================== GET FRIEND LIST ==============================
 export const getFriends = async (userId) => {
   return friendRepository.findFriends(userId);
 };
 
-// Danh sách lời mời đã nhận
+// ============================== GET RECEIVED REQUEST LIST ==============================
 export const getReceivedRequests = async (userId) => {
   return friendRequestRepository.findReceivedRequests(userId);
 };
 
-// Danh sách lời mời đã gửi
+// ============================== GET SENT REQUEST LIST ==============================
 export const getSentRequests = async (userId) => {
   return friendRequestRepository.findSentRequests(userId);
 };

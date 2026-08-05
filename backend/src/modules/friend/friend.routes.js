@@ -3,9 +3,11 @@ import * as friendController from "./friend.controller.js";
 
 const router = express.Router();
 
-router.patch("/requests", friendController.sendRequest);
+router.post("/requests", friendController.sendRequest);
+
 router.post("/requests/:requestId/accept", friendController.acceptRequest);
-router.patch("/requests/:requestId/reject", friendController.rejectRequest);
+
+router.post("/requests/:requestId/reject", friendController.rejectRequest);
 
 router.delete("/requests/:requestId", friendController.cancelRequest);
 
