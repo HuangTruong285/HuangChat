@@ -2,58 +2,41 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    // Tên tài khoản dùng để đăng nhập / nhận diện hệ thống
     username: {
       type: String,
       required: true,
       unique: true,
     },
+    // Email người dùng
     email: {
       type: String,
       required: true,
       unique: true,
     },
+    // Mật khẩu đã được mã hóa
     hashedPassword: {
       type: String,
       required: true,
     },
 
+    // Tên hiển thị trong ứng dụng chat
     displayName: {
       type: String,
       required: true,
+      trim: true,
     },
-    avatarURL: {
-      type: String, // Link CDN để hiển thị hình
-      default: null,
-    },
-    avatarId: {
-      type: String, // Cloudinary public_id để xoá hình
-    },
-    bio: {
+    // Đường dẫn ảnh đại diện (URL)
+    avatar: {
       type: String,
       default: null,
-    },
-    phone: {
-      type: String,
-      sparse: true, // Cho phép null, nhưng không được trùng
     },
 
+    // Trạng thái hoạt động phục vụ hiển thị online/offline trong ứng dụng chat
     status: {
       type: String,
-      enum: ["offline", "online", "away", "busy"],
+      enum: ["offline", "online"],
       default: "offline",
-    },
-    lastSeen: {
-      type: Date,
-      default: null,
-    },
-
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
     },
   },
   {

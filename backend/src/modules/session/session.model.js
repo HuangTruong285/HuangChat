@@ -1,29 +1,26 @@
 import mongoose from "mongoose";
 
-/*
-  user: User sở hữu refresh token
-  token: Chuỗi refresh token, được tạo ra khi user đăng nhập (đã mã hoá)
-  expiresAt: Thời gian hết hạn của refresh token
-  revoked: Trạng thái của refresh token, nếu true thì refresh token đã bị thu hồi và không còn hợp lệ
-*/
-
 const sessionSchema = new mongoose.Schema(
   {
+    // ID người sở hữu refreshToken
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
       index: true,
     },
-    hashedrefreshToken: {
+    // RefreshToken đã mã hoá
+    hashedRefreshToken: {
       type: String,
       required: true,
       unique: true,
     },
+    // Thời gian refresh token hết hạn
     expiresAt: {
       type: Date,
       required: true,
     },
+    // Refresh có bị thu hồi không
     revoked: {
       type: Boolean,
       default: false,
