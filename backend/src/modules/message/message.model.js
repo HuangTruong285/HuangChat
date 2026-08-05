@@ -1,57 +1,36 @@
 import mongoose from "mongoose";
 
-/*
-    conversation: nằm trong phòng nào
-    sender: ai gửi
-    type: loại tin nhắn (văn bản, file, ảnh,...)
-    content: Nội dung
-    replyTo: Trả lời cho tin nhắn nào
-    edited: Đã chỉnh sửa chưa
-    editedAt: Lưu thời gian chỉnh sửa
-    deleted: tin nhắn bị xoá chưa
-*/
-
+// Schema tin nhắn
 const messageSchema = new mongoose.Schema(
   {
+    // ID cuộc trò chuyện của tin nhắn này
     conversationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Conversation",
       required: true,
-      index: true,
     },
+    // ID của người gửi tin nhắn
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
+    // Loại tin nhắn
     type: {
       type: String,
-      enum: ["text", "image", "file", "video", "audio", "system"],
+      enum: ["text", "image"],
       default: "text",
     },
+    // Nội dung văn bản của tin nhắn
     content: {
       type: String,
       trim: true,
-      default: null,
+      default: "",
     },
+    // Đường dẫn (URL) của hình ảnh nếu tin nhắn thuộc loại Image
     imgUrl: {
       type: String,
-    },
-    replyTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Message",
-      default: null,
-    },
-    edited: {
-      type: Boolean,
-      default: false,
-    },
-    editedAt: {
-      type: Date,
-      default: null,
-    },
-    deleted: {
-      type: Boolean,
-      default: false,
+      default: "",
     },
   },
   {
@@ -60,8 +39,11 @@ const messageSchema = new mongoose.Schema(
   },
 );
 
-// Tối ưu câu truy vấn lấy lịch sử tin nhắn theo thứ tự thời gian trong 1 phòng chat
-messageSchema.index({ conversation: 1, createdAt: -1 });
+// Chỉ mục kết hợp tối ưu tốc độ truy vấn
+messageSchema.index({
+  conversationId: 1,
+  createdAt: -1,
+});
 
 const Message = mongoose.model("Message", messageSchema);
 

@@ -1,38 +1,39 @@
 import mongoose from "mongoose";
 
-/*
-    type: Loại phòng private hay group
-    member: Các thành viên trong phòng
-    name: Tên phòng
-    avatar: Avatar phòng
-    owner: Chủ phòng (chỉ dùng cho group)
-    lastMessage: Tin nhắn cuối cùng
-    lastMessageAt: Thời gian tin nhắn cuối cùng
-    
-*/
+// Schema thành viên
 const participantSchema = new mongoose.Schema(
   {
+    // ID người dùng
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    joinAt: {
+    // Thời điểm người đó than gia cuộc trò chuyện
+    joinedAt: {
       type: Date,
       default: Date.now,
     },
   },
   {
-    _id: false, // Không cần id
+    _id: false,
   },
 );
 
+// Schema thông tin nhóm
 const groupSchema = new mongoose.Schema(
   {
+    // Tên nhóm
     name: {
       type: String,
       trim: true,
     },
+    // Đường dẫn ảnh đại diện
+    avatar: {
+      type: String,
+      default: "",
+    },
+    // ID người tạo nhóm
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -43,18 +44,26 @@ const groupSchema = new mongoose.Schema(
   },
 );
 
+// Schema tin nhắn cuối cùng (bản sao)
 const lastMessageSchema = new mongoose.Schema(
   {
-    _id: { type: String },
+    // ID tin nhắn cuối
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+    },
+    // Nội dung tin nhắn
     content: {
       type: String,
-      default: null,
+      default: "",
     },
+    // ID người gửi tin nhắn
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    createAt: {
+    // Thời gian tin nhắn được tạo
+    createdAt: {
       type: Date,
       default: null,
     },
@@ -64,49 +73,64 @@ const lastMessageSchema = new mongoose.Schema(
   },
 );
 
+// Schema cuộc trò chuyện
 const conversationSchema = new mongoose.Schema(
   {
+    // Phân loại cuộc trò chuyện
     type: {
       type: String,
       enum: ["direct", "group"],
       required: true,
     },
+
+    // Thành viên tham gia
     participants: {
       type: [participantSchema],
       required: true,
     },
+
+    // Chứa thông tin nhóm
     group: {
       type: groupSchema,
-    },
-    lastMessage: {
-      type: lastMessageSchema,
-      ref: "Message",
       default: null,
     },
+
+    // Chưa thông tin bản sao tin nhắn cuối
+    lastMessage: {
+      type: lastMessageSchema,
+      default: null,
+    },
+
+    // Thời gian gửi tin nhắn cuối cùng
     lastMessageAt: {
       type: Date,
+      default: Date.now,
     },
+
+    // Mảng chứ danh sách ID những người đã xem tin nhắn cuối cùng
     seenBy: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
-    unReadCounts: {
+
+    // Đếm số tin nhắn chưa đọc của từng người dùng.
+    unreadCounts: {
       type: Map,
       of: Number,
       default: {},
     },
   },
   {
-    timesstamps: true,
+    timestamps: true,
     versionKey: false,
   },
 );
 
-// Tối ưu tốc độ truy vấn danh sách cuộc trò chuyện của 1 user
+// Lấy danh sách cuộc trò chuyện của user theo thời gian hoạt động mới nhất
 conversationSchema.index({
-  "participant.userId": 1,
+  "participants.userId": 1,
   lastMessageAt: -1,
 });
 
