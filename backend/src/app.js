@@ -40,8 +40,8 @@ app.get("/", (req, res) => {
 // Public Route
 app.use("/v1/api/auth", authRoutes);
 
-app.use(authMiddleware);
 // Private Route
+app.use(authMiddleware);
 app.use("/v1/api/users", userRoutes);
 app.use("/v1/api/friends", friendRoutes);
 

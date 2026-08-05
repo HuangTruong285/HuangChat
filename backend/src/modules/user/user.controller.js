@@ -5,8 +5,8 @@ import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
 // ============================== USER ==============================
-export const getProfile = asyncHandler(async (req, res) => {
-  const user = await userService.getProfile(req.user.id);
+export const getCurrentUser = asyncHandler(async (req, res) => {
+  const user = await userService.getCurrentUser(req.userId);
 
   const responseData = userMapper.toCurrentUser(user);
 

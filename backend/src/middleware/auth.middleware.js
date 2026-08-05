@@ -20,7 +20,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     throw ApiError.forbidden("Invalid token signature or tampered token");
   }
   // Lưu thông tin user vào request để sử dụng ở các middleware hoặc route tiếp theo
-  req.user = decoded.id;
+  req.userId = decoded.id;
 
   next();
 });

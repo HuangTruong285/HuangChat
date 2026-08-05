@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema(
     displayName: {
       type: String,
       required: true,
-      trim: true,
     },
     // Đường dẫn ảnh đại diện (URL)
     avatar: {

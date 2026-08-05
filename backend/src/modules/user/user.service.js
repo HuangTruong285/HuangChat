@@ -6,8 +6,8 @@ import * as userMapper from "./user.mapper.js";
 
 // ============================== PROFILE ==============================
 // Lấy thông tin user hiện tại
-export const getProfile = async (userId) => {
-  const user = await userRepository.findById(userId);
+export const getCurrentUser = async (userId) => {
+  const user = await userRepository.findByIdWithoutPassword(userId);
 
   if (!user) {
     throw ApiError.notFound("User not found");

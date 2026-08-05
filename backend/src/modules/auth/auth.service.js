@@ -12,13 +12,6 @@ import { sessionRepository } from "../session/index.js";
 // Hằng số thời gian sống của Refresh Token (7 ngày)
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
 
-// Helper xóa dữ liệu nhạy cảm (hashedPassword) trước khi return
-const sanitizeUser = (user) => {
-  const userObj = user.toObject ? user.toObject() : { ...user };
-  delete userObj.hashedPassword;
-  return userObj;
-};
-
 // ============================== REGISTER ==============================
 export const register = async ({ username, email, password }) => {
   // Kiểm tra username & email song song để tối ưu tốc độ
@@ -60,7 +53,6 @@ export const register = async ({ username, email, password }) => {
   });
 
   return {
-    user,
     accessToken,
     refreshToken,
   };
@@ -95,7 +87,6 @@ export const login = async ({ identifier, password }) => {
   });
 
   return {
-    user: sanitizeUser(user),
     accessToken,
     refreshToken,
   };
@@ -119,20 +110,20 @@ export const refresh = async (refreshToken) => {
     throw ApiError.unauthorized("Refresh token has expired");
   }
 
-  // Rotation: xoá Refresh Token cũ
+  // Xoá Refresh Token cũ (Rotation)
   await sessionRepository.deleteByToken(hashedRefreshToken);
   // Tạo Refresh Token mới
   const newRefreshToken = generateRefreshToken();
   // Lưu Refresh Token mới vào DB
   const hashedNewRefreshToken = await hashRefreshToken(newRefreshToken);
   await sessionRepository.create({
-    userId: session.user,
+    userId: session.userId,
     hashedRefreshToken: hashedNewRefreshToken,
     expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
   });
 
   // Tao Access Token mới
-  const newAccessToken = generateAccessToken(session.user);
+  const newAccessToken = generateAccessToken(session.userId);
 
   // Trả về response với Access Token mới
   return {

@@ -15,10 +15,7 @@ export const register = asyncHandler(async (req, res) => {
 
   setRefreshTokenCookie(res, result.refreshToken);
 
-  const responseData = authMapper.toAuthResponse(
-    result.user,
-    result.accessToken,
-  );
+  const responseData = authMapper.toAuthResponse(result.accessToken);
 
   return ApiResponse.created(res, "User registered successfully", responseData);
 });
@@ -29,10 +26,7 @@ export const login = asyncHandler(async (req, res) => {
 
   setRefreshTokenCookie(res, result.refreshToken);
 
-  const responseData = authMapper.toAuthResponse(
-    result.user,
-    result.accessToken,
-  );
+  const responseData = authMapper.toAuthResponse(result.accessToken);
 
   return ApiResponse.ok(res, "User logged in successfully", responseData);
 });
@@ -49,7 +43,7 @@ export const refresh = asyncHandler(async (req, res) => {
 
   setRefreshTokenCookie(res, result.refreshToken);
 
-  const responseData = authMapper.toRefreshResponse(result.accessToken);
+  const responseData = authMapper.toAuthResponse(result.accessToken);
 
   return ApiResponse.ok(
     res,
@@ -62,7 +56,7 @@ export const refresh = asyncHandler(async (req, res) => {
 export const logout = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
-  if (!refreshToken) {
+  if (refreshToken) {
     await authService.logout(refreshToken);
   }
 
