@@ -1,6 +1,22 @@
 import api from "./axios";
+import { API } from "../constants/api";
 
-export const register = (data) => api.post("v1/api/auth/register", data);
-export const login = (data) => api.post("v1/api/auth/login", data);
-export const refresh = () => api.post("v1/api/auth/refresh");
-export const logout = () => api.post("v1/api/auth/logout");
+export const register = async (body) => {
+  const response = await api.post(API.AUTH.REGISTER, body);
+  return response.data;
+};
+
+export const login = async (body) => {
+  const response = await api.post(API.AUTH.LOGIN, body);
+  return response.data;
+};
+
+export const refresh = async () => {
+  const response = await api.post(API.AUTH.REFRESH);
+  return response.data;
+};
+
+export const logout = async () => {
+  const response = await api.post(API.AUTH.LOGOUT);
+  return response.data;
+};

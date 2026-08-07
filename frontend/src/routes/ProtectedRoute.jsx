@@ -2,8 +2,12 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import useAuth from "../hook/useAuth";
 
 export default function ProtectedRoute() {
-  const { isAuthenticated } = useAuth();
+  const { initializing, isAuthenticated } = useAuth();
   const location = useLocation();
+
+  if (initializing) {
+    return <LoadingPage />;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/auth" replace state={{ from: location }} />;

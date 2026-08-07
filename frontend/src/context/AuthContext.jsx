@@ -1,6 +1,9 @@
 import { createContext, useState, useEffect } from "react";
+
 import * as authService from "../services/auth.service";
 import * as userService from "../services/user.service";
+
+import { getAccessToken, removeAccessToken } from "../utils/token";
 
 export const AuthContext = createContext(null);
 
@@ -10,11 +13,10 @@ export default function AuthProvider({ children }) {
   const [initializing, setInitializing] = useState(true);
   const isAuthenticated = !!user;
 
-  // Lấy thông tin user từ acces token
+  // Hàm lấy thông tin user
   const loadUser = async () => {
-    setInitializing(true);
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const accessToken = getAccessToken();
 
       if (!accessToken) {
         setUser(null);
@@ -25,37 +27,42 @@ export default function AuthProvider({ children }) {
 
       setUser(currentUser);
     } catch (error) {
-      localStorage.removeItem("accessToken");
+      removeAccessToken();
       setUser(null);
-    } finally {
-      setInitializing(false);
     }
   };
 
+  // Mỗi lần reload là chạy loadUser một lần
   useEffect(() => {
-    loadUser();
+    const initialize = async () => {
+      setInitializing(true);
+      await loadUser();
+      setInitializing(false);
+    };
+
+    initialize();
   }, []);
 
-  const login = async (loginData) => {
+  // ============================== REGISTER ==============================
+  const register = async (registerData) => {
     setLoading(true);
     try {
-      const currentUser = await authService.login(loginData);
-
+      await authService.register(registerData);
+      const currentUser = await userService.getMe();
       setUser(currentUser);
-
       return currentUser;
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (registerData) => {
+  // ============================== LOGIN ==============================
+  const login = async (loginData) => {
     setLoading(true);
     try {
-      const currentUser = await authService.register(registerData);
-
+      await authService.login(loginData);
+      const currentUser = await userService.getMe();
       setUser(currentUser);
-
       return currentUser;
     } finally {
       setLoading(false);

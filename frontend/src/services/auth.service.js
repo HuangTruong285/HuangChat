@@ -1,41 +1,40 @@
 import * as authApi from "../api/auth.api";
+import { setAccessToken, removeAccessToken } from "../utils/token";
 
-// Đăng ký
+// ============================== REGISTER ==============================
 export const register = async (registerData) => {
   const response = await authApi.register(registerData);
 
-  const data = response.data.data;
+  const { accessToken } = response.data;
 
-  localStorage.setItem("accessToken", data.accessToken);
-
-  return data.user;
+  setAccessToken(accessToken);
 };
 
-// Đăng nhập
+// ============================== LOGIN ==============================
 export const login = async (loginData) => {
   const response = await authApi.login(loginData);
 
-  const data = response.data.data;
+  const { accessToken } = response.data;
 
-  localStorage.setItem("accessToken", data.accessToken);
-
-  return data.user;
+  setAccessToken(accessToken);
 };
 
+// ============================== REFRESH ==============================
 export const refresh = async () => {
   const response = await authApi.refresh();
 
-  const data = response.data.data;
+  const { accessToken } = response.data;
 
-  localStorage.setItem("accessToken", data.accessToken);
+  setAccessToken(accessToken);
 
-  return data.accessToken;
+  return accessToken;
 };
 
+// ============================== LOGOUT ==============================
 export const logout = async () => {
   try {
     await authApi.logout();
   } finally {
-    localStorage.removeItem("accessToken");
+    removeAccessToken();
   }
 };

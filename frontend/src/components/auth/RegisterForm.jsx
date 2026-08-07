@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useAuth from "../../hook/useAuth";
 
 export default function RegisterForm({ onSwitchForm }) {
@@ -10,6 +11,7 @@ export default function RegisterForm({ onSwitchForm }) {
   });
   const [error, setError] = useState("");
   const { register, loading } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,6 +19,9 @@ export default function RegisterForm({ onSwitchForm }) {
       ...prev,
       [name]: value,
     }));
+    if (error) {
+      setError("");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -51,7 +56,7 @@ export default function RegisterForm({ onSwitchForm }) {
     try {
       const { confirmPassword, ...registerPayload } = formData;
       await register(registerPayload);
-      onSwitchForm();
+      navigate("/chat", { replace: true });
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
