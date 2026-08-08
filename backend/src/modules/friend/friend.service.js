@@ -29,11 +29,11 @@ export const sendRequest = async ({ from, to, message = "" }) => {
     to,
   );
   if (request) {
-    throw ApiError.badRequest("Friend request already exits.");
+    throw ApiError.badRequest("Friend request already exists.");
   }
 
   // Tạo Yêu cầu kết bạn
-  const friendRequest = friendRequestRepository.create({
+  const friendRequest = await friendRequestRepository.create({
     from,
     to,
     message,
