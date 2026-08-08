@@ -7,13 +7,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
+
     // Email người dùng
     email: {
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
+
     // Mật khẩu đã được mã hóa
     hashedPassword: {
       type: String,
@@ -24,7 +28,9 @@ const userSchema = new mongoose.Schema(
     displayName: {
       type: String,
       required: true,
+      trim: true,
     },
+
     // Đường dẫn ảnh đại diện (URL)
     avatar: {
       type: String,

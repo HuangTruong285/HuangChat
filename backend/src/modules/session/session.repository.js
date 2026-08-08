@@ -2,46 +2,47 @@ import Session from "./session.model.js";
 
 // ============================== CREATE ==============================
 
-// Tạo refresh token mới
+// Tạo session mới
 export const create = (data) => {
   return Session.create(data);
 };
 
-// ============================== READ/FIND ==============================
+// ============================== READ ==============================
 
-// Tìm refresh token theo token
-export const findByToken = (token) => {
-  return Session.findOne({ hashedRefreshToken: token });
+// Tìm session theo token hash
+export const findByTokenHash = (tokenHash) => {
+  return Session.findOne({ tokenHash });
 };
 
-// Lấy tất cả refresh token của user
+// Lấy tất cả session của user
 export const findByUserId = (userId) => {
   return Session.find({ userId });
 };
 
 // ============================== UPDATE ==============================
 
-// Thu hồi refresh token
-export const revokeByToken = (token) => {
+// Thu hồi session theo token hash
+export const revokeByTokenHash = (tokenHash) => {
   return Session.findOneAndUpdate(
-    { hashedRefreshToken: token },
+    { tokenHash },
     { revoked: true },
     { new: true },
   );
 };
 
-// Thu hồi tất cả refresh token của user
+// Thu hồi tất cả session của user
 export const revokeAllByUserId = (userId) => {
   return Session.updateMany({ userId, revoked: false }, { revoked: true });
 };
 
 // ============================== DELETE ==============================
-// Xoá refresh token theo token
-export const deleteByToken = (token) => {
-  return Session.deleteOne({ hashedRefreshToken: token });
+
+// Xóa session theo token hash
+export const deleteByTokenHash = (tokenHash) => {
+  return Session.deleteOne({ tokenHash });
 };
 
-// Xoá tất cả refresh token của user
+// Xóa tất cả session của user
 export const deleteAllByUserId = (userId) => {
   return Session.deleteMany({ userId });
 };

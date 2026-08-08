@@ -1,34 +1,26 @@
 class ApiError extends Error {
-  // Khởi tạo lỗi tùy chỉnh cho API
-  // statusCode: mã HTTP cần trả về
-  // message: thông báo lỗi cho client
-  // errors: danh sách lỗi chi tiết (nếu có)
-  // code: mã lỗi nội bộ (tuỳ chọn)
-  // isOperational: lỗi do người dùng/logic gây ra hay lỗi hệ thống
+  /*
+    statusCode: mã HTTP cần trả về
+    message: thông báo lỗi cho client
+    errors: danh sách lỗi chi tiết (nếu có)
+    isOperational: lỗi do người dùng/logic gây ra hay lỗi hệ thống
+  */
   constructor({
     statusCode = 500,
     message = "Internal Server Error",
     errors = [],
-    code = null,
     isOperational = true,
-    stack,
   }) {
     super(message);
-    Object.setPrototypeOf(this, new.target.prototype); // restore prototype chain
+
+    Object.setPrototypeOf(this, new.target.prototype);
 
     this.name = this.constructor.name;
     this.statusCode = statusCode;
-    this.message = message;
     this.errors = Array.isArray(errors) ? errors : [errors];
-    this.code = code;
     this.isOperational = isOperational;
 
-    if (stack) {
-      this.stack = stack;
-    } else {
-      Error.captureStackTrace(this, this.constructor);
-      this.stack = this.stack.split("\n").slice(0, 5).join("\n");
-    }
+    Error.captureStackTrace(this, this.constructor);
   }
 
   // 503 Service Unavailable: dịch vụ tạm thời không khả dụng

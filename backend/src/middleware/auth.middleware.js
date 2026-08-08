@@ -1,26 +1,27 @@
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { verifyAccessToken } from "../utils/jwt.js";
-import { userRepository } from "../modules/user/index.js";
 
-// Authorized - xác minh user là ai
+// ============================== XÁC THỰC ==============================
+// Xác thực người dùng
 const authMiddleware = asyncHandler(async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw ApiError.unauthorized("No token provided");
+  // Kiểm tra Authorization header
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw ApiError.unauthorized("No access token provided");
   }
 
-  // Lấy token từ header
-  const refreshToken = authHeader.split(" ")[1];
+  // Lấy Access Token
+  const accessToken = authHeader.split(" ")[1];
 
-  // Xác thực token
-  const decoded = verifyAccessToken(refreshToken);
-  if (!decoded) {
-    throw ApiError.forbidden("Invalid token signature or tampered token");
-  }
-  // Lưu thông tin user vào request để sử dụng ở các middleware hoặc route tiếp theo
-  req.userId = decoded.id;
+  // Xác thực Access Token
+  const decoded = verifyAccessToken(accessToken);
+
+  // Lưu thông tin người dùng để các middleware/controller phía sau sử dụng
+  req.user = {
+    id: decoded.id,
+  };
 
   next();
 });

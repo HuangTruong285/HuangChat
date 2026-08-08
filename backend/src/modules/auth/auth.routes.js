@@ -1,21 +1,16 @@
 import { Router } from "express";
 
-import { registerValidator, loginValidator } from "./auth.validator.js";
-import validateMiddleware from "../../middleware/validate.middleware.js";
+import { registerSchema, loginSchema } from "./auth.validator.js";
+import validate from "../../middleware/validate.middleware.js";
 
 import * as authController from "./auth.controller.js";
 
 const router = Router();
 
 // ============================== REGISTER ==============================
-router.post(
-  "/register",
-  registerValidator,
-  validateMiddleware,
-  authController.register,
-);
+router.post("/register", validate(registerSchema), authController.register);
 // ============================== LOGIN ==============================
-router.post("/login", loginValidator, validateMiddleware, authController.login);
+router.post("/login", validate(loginSchema), authController.login);
 // ============================== REFRESH ==============================
 router.post("/refresh", authController.refresh);
 // ============================== LOGOUT ==============================

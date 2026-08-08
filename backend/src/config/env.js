@@ -1,82 +1,86 @@
 import dotenv from "dotenv";
 
-// Load biến môi trường từ file .env vào process.env
 dotenv.config();
 
-// Các biến môi trường bắt buộc phải có
-const requiredEnvs = ["MONGO_URI", "JWT_ACCESS_SECRET"];
-
-// Lọc ra những biến bị thiếu
+// 1. Kiểm tra các biến bắt buộc
+const requiredEnvs = ["MONGO_URI", "JWT_ACCESS_SECRET", "CLIENT_URL"];
 const missingEnvs = requiredEnvs.filter((key) => !process.env[key]?.trim());
-
-// Nếu thiếu thì dừng chương trình
 if (missingEnvs.length > 0) {
   throw new Error(
     `❌ Thiếu biến môi trường bắt buộc: ${missingEnvs.join(", ")}`,
   );
 }
 
-// Lấy môi trường chạy: development, production, test
-const nodeEnv = (process.env.NODE_ENV || "development").toLowerCase();
+// 2. Validate NODE_ENV
 const allowedEnvs = ["development", "production", "test"];
-
-// Kiểm tra NODE_ENV có hợp lệ không
+const nodeEnv = (process.env.NODE_ENV || "development").toLowerCase();
 if (!allowedEnvs.includes(nodeEnv)) {
   throw new Error(`❌ NODE_ENV không hợp lệ: ${nodeEnv}`);
 }
 
-// Chuyển PORT sang số nguyên và kiểm tra khoảng hợp lệ
+// 3. Parse & Validate PORT
 const parsedPort = Number.parseInt(process.env.PORT || "5000", 10);
 const port =
   !Number.isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535
     ? parsedPort
     : 5000;
-// Chuyển REFRESH_TOKEN_TTL sang số nguyên (mặc định 7 ngày tính bằng ms)
+
+// 4. Parse & Validate REFRESH_TOKEN_TTL (Sửa lỗi thiếu 'const')
 const parsedRefreshTTL = Number.parseInt(
   process.env.REFRESH_TOKEN_TTL || "604800000",
   10,
 );
-// Chuyển SALT_ROUNDS sang số nguyên
-const parsedSaltRounds = Number.parseInt(process.env.SALT_ROUNDS || "12", 10);
+const refreshTokenTTL =
+  !Number.isNaN(parsedRefreshTTL) && parsedRefreshTTL > 0
+    ? parsedRefreshTTL
+    : 604800000;
 
-// Tạo object chứa cấu hình môi trường
+// 5. Parse & Validate SALT_ROUNDS
+const parsedSaltRounds = Number.parseInt(process.env.SALT_ROUNDS || "12", 10);
+const saltRounds =
+  !Number.isNaN(parsedSaltRounds) &&
+  parsedSaltRounds >= 8 &&
+  parsedSaltRounds <= 15
+    ? parsedSaltRounds
+    : 12;
+
+// ============================== CONFIG OBJECT ==============================
 const env = {
   port,
   nodeEnv,
   isDev: nodeEnv === "development",
   isProd: nodeEnv === "production",
 
-  // URL frontend cho phép truy cập
-  clientUrl:
-    process.env.CLIENT_URL?.trim() ||
-    (nodeEnv === "production" ? "" : "http://localhost:5173"),
+  clientUrl: process.env.CLIENT_URL?.trim(),
 
-  // Cấu hình MongoDB
   mongoDB: {
     uri: process.env.MONGO_URI?.trim(),
   },
 
-  // Cấu hình JWT
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET?.trim(),
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN?.trim() || "15m",
   },
 
-  // Đã sửa tên biến REFRESH_TOKEN_TTL và ép kiểu number
-  refreshTokenTTL: Number.isNaN(parsedRefreshTTL)
-    ? 604800000
-    : parsedRefreshTTL,
+  refreshTokenTTL,
 
-  // Đã ép kiểu number
   bcrypt: {
-    saltRounds: Number.isNaN(parsedSaltRounds) ? 12 : parsedSaltRounds,
+    saltRounds,
   },
 };
 
-// Đóng đóng toàn bộ các object con và object chính
-Object.freeze(env.mongoDB);
-Object.freeze(env.jwt);
-Object.freeze(env.bcrypt);
-Object.freeze(env);
+// Hàm đệ quy đóng băng toàn bộ Object (Deep Freeze)
+const deepFreeze = (obj) => {
+  Object.keys(obj).forEach((prop) => {
+    if (
+      typeof obj[prop] === "object" &&
+      obj[prop] !== null &&
+      !Object.isFrozen(obj[prop])
+    ) {
+      deepFreeze(obj[prop]);
+    }
+  });
+  return Object.freeze(obj);
+};
 
-export default env;
+export default deepFreeze(env);

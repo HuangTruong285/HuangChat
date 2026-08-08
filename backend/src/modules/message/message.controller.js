@@ -7,7 +7,7 @@ import asyncHandler from "../../utils/asyncHandler.js";
 export const sendMessage = asyncHandler(async (req, res) => {
   const message = await messageService.sendMessage({
     conversationId: req.body.conversationId,
-    senderId: req.userId,
+    senderId: req.user.id,
     type: req.body.type,
     content: req.body.content,
     imgUrl: req.body.imgUrl,

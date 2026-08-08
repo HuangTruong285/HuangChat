@@ -1,10 +1,11 @@
 class ApiResponse {
-  // Tạo một object phản hồi chuẩn cho API
-  // success: trạng thái thành công hay thất bại
-  // statusCode: mã trạng thái HTTP
-  // message: thông điệp phản hồi
-  // data: dữ liệu trả về (nếu có)
-  // meta: thông tin bổ sung (nếu có)
+  /*
+  success: trạng thái thành công hay thất bại
+  statusCode: mã trạng thái HTTP
+  message: thông điệp phản hồi
+  data: dữ liệu trả về (nếu có)
+  meta: thông tin bổ sung (nếu có)
+*/
   constructor({
     statusCode = 200,
     message = "Success",
@@ -19,23 +20,27 @@ class ApiResponse {
     this.meta = meta;
     this.timestamp = new Date().toISOString();
 
+    if (meta !== null) {
+      this.meta = meta;
+    }
+
     // Ngăn chỉnh sửa object sau khi tạo
     Object.freeze(this);
   }
 
-  // Gửi response về client theo format chuẩn
+  // ============================== FORMAT GỬI CHUẨN ==============================
   static send(
     res,
     { statusCode = 200, message = "Success", data = null, meta = null } = {},
   ) {
-    return res.status(statusCode).json(
-      new ApiResponse({
-        statusCode,
-        message,
-        data,
-        meta,
-      }),
-    );
+    const response = new ApiResponse({
+      statusCode,
+      message,
+      data,
+      meta,
+    });
+
+    return res.status(statusCode).json(response);
   }
 
   // 200 OK: trả về dữ liệu bình thường

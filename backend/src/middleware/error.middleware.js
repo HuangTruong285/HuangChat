@@ -1,53 +1,67 @@
 import env from "../config/env.js";
 import ApiError from "../utils/ApiError.js";
 
-// Lỗi 404 xử lý cho tuyến đường không khớp
+// ============================== LỖI ROUTE KHÔNG KHỚP ==============================
+// Xử lý các route không tồn tại
 export const notFound = (req, res, next) => {
   next(ApiError.notFound(`Route not found: ${req.method} ${req.originalUrl}`));
 };
 
-// Middleware xử lý lỗi tập trung (Bắt buộc 4 tham số)
+// ============================== XỬ LÝ LỖI TẬP TRUNG ==============================
+
+// Middleware xử lý lỗi tập trung
 export const errorHandler = (err, req, res, next) => {
   let customError = err;
 
-  // Chuyển đổi các lỗi đặc thù thành ApiError
+  // Mongoose CastError (ObjectId không hợp lệ)
   if (err.name === "CastError") {
     customError = ApiError.badRequest(`Invalid ${err.path}: ${err.value}`);
-  } else if (err.code === 11000) {
-    const fields = Object.keys(err.keyValue || {});
-    const fieldsNames = fields.length > 0 ? fields.join(", ") : "field";
+  }
 
-    customError = ApiError.conflict(`${fieldsNames} already exists`);
-  } else if (err.name === "ValidationError") {
-    const errors = Object.values(err.errors || {}).map((error) => ({
+  // MongoDB Duplicate Key Error
+  else if (err.code === 11000) {
+    const fields = Object.keys(err.keyValue ?? {});
+    const fieldNames = fields.length ? fields.join(", ") : "Field";
+
+    customError = ApiError.conflict(`${fieldNames} already exists`);
+  }
+
+  // Mongoose Validation Error
+  else if (err.name === "ValidationError") {
+    const errors = Object.values(err.errors ?? {}).map((error) => ({
       field: error.path,
       message: error.message,
     }));
 
     customError = ApiError.unprocessableEntity("Validation failed", errors);
-  } else if (err.name === "JsonWebTokenError") {
-    customError = ApiError.unauthorized("Invalid token. Please log in again.");
-  } else if (err.name === "TokenExpiredError") {
+  }
+
+  // JWT Error
+  else if (
+    err.name === "JsonWebTokenError" ||
+    err.name === "TokenExpiredError"
+  ) {
     customError = ApiError.unauthorized(
-      "Token has expired. Please log in again",
+      "Invalid or expired token. Please log in again.",
     );
   }
 
-  // Những Error thông thường -> Internal Server Error
+  // Những lỗi không phải ApiError
   if (!(customError instanceof ApiError)) {
     console.error("🔥 Unexpected Error:", err);
     customError = ApiError.internal();
   }
 
-  // Log các lỗi hệ thống nghiêm trọng
-  if (customError.isOperational === false) {
-    console.error("🔥 Critical Error:", customError);
+  // Log lỗi hệ thống
+  if (!customError.isOperational) {
+    console.error("🔥 Critical Error:", err);
   }
 
   const response = {
     success: false,
     statusCode: customError.statusCode,
     message: customError.message,
+    path: req.originalUrl,
     timestamp: new Date().toISOString(),
   };
 
@@ -55,8 +69,7 @@ export const errorHandler = (err, req, res, next) => {
     response.errors = customError.errors;
   }
 
-  const isProduction = (env.nodeEnv || "").toLowerCase() === "production";
-  if (!isProduction) {
+  if (!env.isProd) {
     response.stack = customError.stack;
   }
 

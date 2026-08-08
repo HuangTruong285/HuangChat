@@ -9,8 +9,29 @@ import {
 import { userRepository } from "../user/index.js";
 import { sessionRepository } from "../session/index.js";
 
+// ============================== CONSTANT ==============================
 // Hằng số thời gian sống của Refresh Token (7 ngày)
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
+
+// ============================== PRIVATE HELPER ==============================
+// Tạo access token + refresh token + session
+const createSession = async (userId) => {
+  const accessToken = generateAccessToken(userId);
+
+  const refreshToken = generateRefreshToken();
+  const tokenHash = await hashRefreshToken(refreshToken);
+
+  await sessionRepository.create({
+    userId,
+    tokenHash,
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
 
 // ============================== REGISTER ==============================
 export const register = async ({ username, email, password }) => {
@@ -38,24 +59,7 @@ export const register = async ({ username, email, password }) => {
     displayName: username,
   });
 
-  // Access Token
-  const accessToken = generateAccessToken(user._id);
-
-  // Refresh Token
-  const refreshToken = generateRefreshToken();
-  const hashedRefreshToken = await hashRefreshToken(refreshToken);
-
-  // Lưu Refresh Token vào DB
-  await sessionRepository.create({
-    userId: user._id,
-    hashedRefreshToken,
-    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
-  });
-
-  return {
-    accessToken,
-    refreshToken,
-  };
+  return createSession(user._id);
 };
 
 // ============================== LOGIN ==============================
@@ -72,33 +76,16 @@ export const login = async ({ identifier, password }) => {
     throw ApiError.unauthorized("Invalid username or password");
   }
 
-  // Access Token
-  const accessToken = generateAccessToken(user._id);
-
-  // Refresh Token
-  const refreshToken = generateRefreshToken();
-  const hashedRefreshToken = await hashRefreshToken(refreshToken);
-
-  // Lưu Refresh Token vào DB
-  await sessionRepository.create({
-    userId: user._id,
-    hashedRefreshToken,
-    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
-  });
-
-  return {
-    accessToken,
-    refreshToken,
-  };
+  return createSession(user._id);
 };
 
 // ============================== REFRESH ==============================
 export const refresh = async (refreshToken) => {
   // Hash Refresh Token trước khi tìm kiếm trong DB
-  const hashedRefreshToken = await hashRefreshToken(refreshToken);
+  const tokenHash = await hashRefreshToken(refreshToken);
 
   // Tìm Refresh Token trong DB
-  const session = await sessionRepository.findByToken(hashedRefreshToken);
+  const session = await sessionRepository.findByTokenHash(tokenHash);
 
   // Nếu không tìm thấy hoặc Refresh Token đã bị thu hồi, trả về lỗi
   if (!session || session.revoked) {
@@ -110,33 +97,16 @@ export const refresh = async (refreshToken) => {
     throw ApiError.unauthorized("Refresh token has expired");
   }
 
-  // Xoá Refresh Token cũ (Rotation)
-  await sessionRepository.deleteByToken(hashedRefreshToken);
-  // Tạo Refresh Token mới
-  const newRefreshToken = generateRefreshToken();
-  // Lưu Refresh Token mới vào DB
-  const hashedNewRefreshToken = await hashRefreshToken(newRefreshToken);
-  await sessionRepository.create({
-    userId: session.userId,
-    hashedRefreshToken: hashedNewRefreshToken,
-    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
-  });
-
-  // Tao Access Token mới
-  const newAccessToken = generateAccessToken(session.userId);
-
-  // Trả về response với Access Token mới
-  return {
-    accessToken: newAccessToken,
-    refreshToken: newRefreshToken,
-  };
+  // Vô hiệu hoá Refresh Token cũ (Rotation)
+  await sessionRepository.revokeByTokenHash(tokenHash);
+  return createSession(session.userId);
 };
 
 // ============================== LOGOUT ==============================
 export const logout = async (refreshToken) => {
   // Hash Refresh Token trước khi tìm kiếm trong DB
-  const hashedRefreshToken = await hashRefreshToken(refreshToken);
+  const tokenHash = await hashRefreshToken(refreshToken);
 
-  // Xoá Refresh Token khỏi DB
-  await sessionRepository.deleteByToken(hashedRefreshToken);
+  // Vô hiệu hoá Refresh Token
+  await sessionRepository.revokeByTokenHash(tokenHash);
 };

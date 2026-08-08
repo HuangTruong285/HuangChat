@@ -1,13 +1,29 @@
-import { validationResult } from "express-validator";
 import ApiError from "../utils/ApiError.js";
 
-const validate = (req, res, next) => {
-  const errors = validationResult(req);
+// ============================== VALIDATE REQUEST ==============================
 
-  if (!errors.isEmpty()) {
-    return next(ApiError.badRequest("Validation error", errors.array()));
-  }
-  next();
+const validate = (schema, property = "body") => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req[property], {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+
+    if (error) {
+      const validationErrors = error.details.map((detail) => ({
+        field: detail.path.join("."),
+        message: detail.message,
+      }));
+
+      return next(
+        ApiError.unprocessableEntity("Validation failed", validationErrors),
+      );
+    }
+
+    req[property] = value;
+
+    next();
+  };
 };
 
 export default validate;

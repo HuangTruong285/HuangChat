@@ -6,7 +6,7 @@ import asyncHandler from "../../utils/asyncHandler.js";
 // ============================== CREATE DIRECT CONVERSATION ==============================
 export const createDirectConversation = asyncHandler(async (req, res) => {
   const conversation = await conversationService.createDirectConversation(
-    req.userId,
+    req.user.id,
     req.body.userId,
   );
 
@@ -22,7 +22,7 @@ export const createGroupConversation = asyncHandler(async (req, res) => {
   const conversation = await conversationService.createGroupConversation({
     name: req.body.name,
     avatar: req.body.avatar,
-    createdBy: req.userId,
+    createdBy: req.user.id,
     participantIds: req.body.participantIds,
   });
 
@@ -36,7 +36,7 @@ export const createGroupConversation = asyncHandler(async (req, res) => {
 // ============================== GET MY CONVERSATIONS ==============================
 export const getMyConversations = asyncHandler(async (req, res) => {
   const conversations = await conversationService.getMyConversations(
-    req.userId,
+    req.user.id,
   );
 
   return ApiResponse.ok(

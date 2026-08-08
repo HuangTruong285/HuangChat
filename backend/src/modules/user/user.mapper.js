@@ -1,4 +1,4 @@
-// Thông tin trả về cho chính chủ tài khoản
+// Thông tin user của chính chủ tài khoản
 export const toCurrentUser = (user) => ({
   id: user.id,
   username: user.username,
@@ -7,10 +7,10 @@ export const toCurrentUser = (user) => ({
   avatar: user.avatar,
   status: user.status,
   createdAt: user.createdAt,
-  updateAt: user.updateAt,
+  updatedAt: user.updatedAt,
 });
 
-// Thông tin public của một user.
+// Thông tin public của user
 export const toPublicUser = (user) => ({
   id: user.id,
   username: user.username,
@@ -19,14 +19,5 @@ export const toPublicUser = (user) => ({
   status: user.status,
 });
 
-// Thông tin dùng trong kết quả tìm kiếm
-export const toSearchResult = (user) => ({
-  id: user.id,
-  username: user.username,
-  displayName: user.displayName,
-  avatar: user.avatar,
-  status: user.status,
-});
-
-// Mapping danh sách user
-export const toSearchResults = (users) => users.map(toSearchResult);
+// Mapping danh sách user public
+export const toPublicUsers = (users) => users.map(toPublicUser);

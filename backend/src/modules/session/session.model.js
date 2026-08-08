@@ -10,7 +10,7 @@ const sessionSchema = new mongoose.Schema(
       index: true,
     },
     // RefreshToken đã mã hoá
-    hashedRefreshToken: {
+    tokenHash: {
       type: String,
       required: true,
       unique: true,

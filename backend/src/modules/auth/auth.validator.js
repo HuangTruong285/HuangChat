@@ -1,37 +1,47 @@
-import { body } from "express-validator";
+import Joi from "joi";
 
-// Validate đăng ký tài khoản mới
-export const registerValidator = [
-  body("username")
-    .trim()
-    .notEmpty()
-    .withMessage("Username is required")
-    .isLength({ min: 3, max: 30 })
-    .withMessage(
-      "Username must be at least 3 characters long and at most 30 characters long",
-    )
-    .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage("Username can only contain letters, numbers, and underscores"),
-  body("email")
-    .trim()
-    .notEmpty()
-    .withMessage("Email is required")
-    .isEmail()
-    .withMessage("Invalid email format"),
-  body("password")
-    .notEmpty()
-    .withMessage("Password is required")
-    .isLength({ min: 6, max: 100 })
-    .withMessage(
-      "Password must be at least 6 characters long and at most 100 characters long",
-    ),
-];
+// ============================== REGISTER ==============================
 
-// Validate đăng nhập
-export const loginValidator = [
-  body("identifier")
+export const registerSchema = Joi.object({
+  username: Joi.string()
     .trim()
-    .notEmpty()
-    .withMessage("Username or email is required"),
-  body("password").notEmpty().withMessage("Password is required"),
-];
+    .min(3)
+    .max(30)
+    .pattern(/^[a-zA-Z0-9_]+$/)
+    .required()
+    .messages({
+      "string.empty": "Username is required",
+      "string.min": "Username must be at least 3 characters",
+      "string.max": "Username must not exceed 30 characters",
+      "string.pattern.base":
+        "Username can only contain letters, numbers, and underscores",
+      "any.required": "Username is required",
+    }),
+
+  email: Joi.string().trim().email().required().messages({
+    "string.empty": "Email is required",
+    "string.email": "Invalid email format",
+    "any.required": "Email is required",
+  }),
+
+  password: Joi.string().min(6).max(100).required().messages({
+    "string.empty": "Password is required",
+    "string.min": "Password must be at least 6 characters",
+    "string.max": "Password must not exceed 100 characters",
+    "any.required": "Password is required",
+  }),
+});
+
+// ============================== LOGIN ==============================
+
+export const loginSchema = Joi.object({
+  identifier: Joi.string().trim().required().messages({
+    "string.empty": "Username or email is required",
+    "any.required": "Username or email is required",
+  }),
+
+  password: Joi.string().required().messages({
+    "string.empty": "Password is required",
+    "any.required": "Password is required",
+  }),
+});
