@@ -23,13 +23,12 @@ const connectDB = async () => {
 
   // Kết nối Database trong 10 giây. Nếu được thì kết nối thành công, không được thì là trả về lỗi
   try {
-    const connect = await mongoose.connect(url, {
+    const conn = await mongoose.connect(url, {
       serverSelectionTimeoutMS: 10000,
     });
     console.log(
-      `✅ MongoDB connected: ${connect.connection.host}/${connect.connection.name}`,
+      `✅ MongoDB connected: ${conn.connection.host}/${conn.connection.name}`,
     );
-    return connect;
   } catch (error) {
     console.error(`❌ MongoDB connection error: ${error.message}`);
     throw error;

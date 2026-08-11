@@ -15,7 +15,7 @@ export default function Navbar() {
 
       <div>
         <Link
-          to="auth"
+          to="/auth"
           className="transform rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 hover:bg-indigo-700"
         >
           Đăng nhập / Đăng ký
