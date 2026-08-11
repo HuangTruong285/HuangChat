@@ -17,5 +17,5 @@ export const updateStatusSchema = Joi.object({
 
 // Tìm kiếm user
 export const searchUsersSchema = Joi.object({
-  q: Joi.string().trim().min(1).max(50).required(),
+  keyword: Joi.string().trim().min(1).max(50).required(),
 });

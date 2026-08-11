@@ -20,7 +20,14 @@ const validate = (schema, property = "body") => {
       );
     }
 
-    req[property] = value;
+    // Nếu property là 'query' hoặc 'params', xóa dữ liệu cũ và gán dữ liệu đã validate vào
+    if (property === "query" || property === "params") {
+      Object.keys(req[property]).forEach((key) => delete req[property][key]);
+      Object.assign(req[property], value);
+    } else {
+      // Đối với 'body' hoặc các thuộc tính khác, vẫn có thể gán trực tiếp bằng dấu =
+      req[property] = value;
+    }
 
     next();
   };

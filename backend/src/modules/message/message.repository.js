@@ -3,19 +3,22 @@ import Message from "./message.model.js";
 // ============================== DELETE ==============================
 
 // Tạo một message
-const create = (messageData) => {
+export const create = (messageData) => {
   return Message.create(messageData);
 };
 
 // ============================== READ / FIND ==============================
 
 // Tìm tin nhắn theo id tin nhắn
-const findById = (messageId) => {
+export const findById = (messageId) => {
   return Message.findById(messageId);
 };
 
 // Lấy tin nhắn của một cuộc trò chuyện với cơ chế phân trang
-const findByConversation = (conversationId, { page = 1, limit = 30 } = {}) => {
+export const findByConversation = (
+  conversationId,
+  { page = 1, limit = 30 } = {},
+) => {
   const skip = (page - 1) * limit;
 
   return Message.find({ conversationId })
@@ -26,21 +29,21 @@ const findByConversation = (conversationId, { page = 1, limit = 30 } = {}) => {
 };
 
 // Lấy tin nhắn mới nhất của một cuộc trò chuyện
-const findLatestByConversation = (conversationId) => {
+export const findLatestByConversation = (conversationId) => {
   return Message.findOne({ conversationId })
     .sort({ createdAt: -1 })
     .populate("senderId", "displayName avatarUrl");
 };
 
 // Đếm tổng số tin nhắn có trong cuộc trò chuyện này
-const countByConversation = (conversationId) => {
+export const countByConversation = (conversationId) => {
   return Message.countDocuments({ conversationId });
 };
 
 // ============================== UPDATE ==============================
 
 // Cập nhật thông tin tin nhắn
-const updateById = (messageId, data) => {
+export const updateById = (messageId, data) => {
   return Message.findByIdAndUpdate(messageId, data, {
     new: true,
     runValidators: true,
@@ -50,6 +53,6 @@ const updateById = (messageId, data) => {
 // ============================== DELETE ==============================
 
 // Xoá tin nhắn theo id message
-const deleteById = (messageId) => {
+export const deleteById = (messageId) => {
   return Message.findByIdAndDelete(messageId);
 };

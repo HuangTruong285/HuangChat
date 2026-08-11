@@ -3,21 +3,21 @@ import Conversation from "./conversation.model.js";
 // ============================== CREATE ==============================
 
 // Tạo một cuộc trò chuyện mới
-const create = (data) => {
+export const create = (data) => {
   return Conversation.create(data);
 };
 
 // ============================== READ / FIND ==============================
 
 // TÌm cuộc trò chuyện theo ID
-const findById = (conversationId) => {
+export const findById = (conversationId) => {
   return Conversation.findById(conversationId)
     .populate("participants.userId", "displayName avatarUrl")
     .populate("group.createdBy", "displayName avatarUrl");
 };
 
 // Tìm cuộc trò chuyện 1-1 giữa hai người cụ thể
-const findDirectConversation = (userAId, userBId) => {
+export const findDirectConversation = (userAId, userBId) => {
   return Conversation.findOne({
     type: "direct",
     "participants.userId": {
@@ -27,7 +27,7 @@ const findDirectConversation = (userAId, userBId) => {
 };
 
 // Lấy tất cả cuộc trò chuyện mà một người dùng tham gia
-const findByUser = (userId) => {
+export const findByUser = (userId) => {
   return Conversation.find({
     "participants.userId": userId,
   })
@@ -38,7 +38,7 @@ const findByUser = (userId) => {
 // ============================== UPDATE ==============================
 
 // Cập nhật thông tin
-const updateById = (conversationId, data) => {
+export const updateById = (conversationId, data) => {
   return Conversation.findByIdAndUpdate(conversationId, data, {
     new: true,
     runValidators: true,
@@ -46,7 +46,7 @@ const updateById = (conversationId, data) => {
 };
 
 // Cập nhật tin nhắn mới nhất
-const updateLastMessage = (
+export const updateLastMessage = (
   conversationId,
   lastMessage,
   lastMessageAt = new Date(),
@@ -64,7 +64,7 @@ const updateLastMessage = (
 };
 
 // Thêm thành viên mới vào danh sách
-const addParticipant = (conversationId, participant) => {
+export const addParticipant = (conversationId, participant) => {
   return Conversation.findByIdAndUpdate(
     conversationId,
     {
@@ -79,7 +79,7 @@ const addParticipant = (conversationId, participant) => {
 };
 
 // Xoá một thành viên ra khỏi cuộc trò chuyện
-const removeParticipant = (conversationId, userId) => {
+export const removeParticipant = (conversationId, userId) => {
   return Conversation.findByIdAndUpdate(
     conversationId,
     {
@@ -96,7 +96,7 @@ const removeParticipant = (conversationId, userId) => {
 };
 
 // Đánh dấu người dùng đã xem tin nhắn
-const markAsSeen = (conversationId, userId) => {
+export const markAsSeen = (conversationId, userId) => {
   return Conversation.findByIdAndUpdate(
     conversationId,
     {
@@ -111,7 +111,7 @@ const markAsSeen = (conversationId, userId) => {
 };
 
 // Đặt lại danh sách người dùng đã xem về rỗng
-const clearSeenBy = (conversationId) => {
+export const clearSeenBy = (conversationId) => {
   return Conversation.findByIdAndUpdate(
     conversationId,
     {
@@ -126,6 +126,6 @@ const clearSeenBy = (conversationId) => {
 // ============================== DELETE ==============================
 
 // Xoá cuộc trò chuyện
-const deleteById = (conversationId) => {
+export const deleteById = (conversationId) => {
   return Conversation.findByIdAndDelete(conversationId);
 };

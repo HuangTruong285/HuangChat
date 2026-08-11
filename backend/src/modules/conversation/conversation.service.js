@@ -6,7 +6,7 @@ import ApiError from "../../utils/ApiError.js";
 export const createDirectConversation = async (userAId, userBId) => {
   // Kiểm tra xem có phải hai người khác nhau không
   if (userAId.toString() === userBId.toString()) {
-    throw new ApiError(400, "Cannot create conversation with yourself");
+    throw ApiError.badRequest("Cannot create conversation with yourself");
   }
 
   // Kiểm tra có cuộc trò chuyện giữa hai người không
@@ -36,7 +36,7 @@ export const createGroupConversation = async ({
   createdBy,
   participantIds,
 }) => {
-  // CHuyển sách sách ID thành viên thành danh sách chuỗi không trùng
+  // Chuyển sách sách ID thành viên thành danh sách chuỗi không trùng
   const memberIds = [
     ...new Set([
       createdBy.toString(),
