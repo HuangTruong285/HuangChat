@@ -1,4 +1,5 @@
 import * as conversationRepository from "./conversation.repository.js";
+import * as conversationMapper from "./conversation.mapper.js";
 
 import ApiError from "../../utils/ApiError.js";
 
@@ -14,11 +15,11 @@ export const createDirectConversation = async (userAId, userBId) => {
     await conversationRepository.findDirectConversation(userAId, userBId);
   // Nếu có thì trả về cuộc trò chuyện đó, không tạo
   if (existedConversation) {
-    return existedConversation;
+    return conversationMapper.toConversation(existedConversation);
   }
 
   // Tạo cuộc trò chuyện trực tiếp
-  return conversationRepository.create({
+  const directConversation = await conversationRepository.create({
     type: "direct",
     participants: [{ userId: userAId }, { userId: userBId }],
     seenBy: [],
@@ -27,12 +28,14 @@ export const createDirectConversation = async (userAId, userBId) => {
       [userBId]: 0,
     },
   });
+
+  return conversationMapper.toConversation(directConversation);
 };
 
 // ============================== CREATE GROUP CONVERSATION ==============================
 export const createGroupConversation = async ({
   name,
-  avatar = "",
+  avatarUrl = "",
   createdBy,
   participantIds,
 }) => {
@@ -61,17 +64,19 @@ export const createGroupConversation = async ({
     unreadCounts[id] = 0;
   });
 
-  return conversationRepository.create({
+  const groupConversation = await conversationRepository.create({
     type: "group",
     participants,
     group: {
       name,
-      avatar,
+      avatarUrl,
       createdBy,
     },
     seenBy: [],
     unreadCounts,
   });
+
+  return conversationMapper.toConversation(groupConversation);
 };
 
 // ============================== GET CONVERSATION ==============================
@@ -88,7 +93,8 @@ export const getConversation = async (conversationId) => {
 // ============================== GET MY CONVERSATIONS ==============================
 // Lấy tất cả cuộc trò chuyện của tôi
 export const getMyConversations = async (userId) => {
-  return conversationRepository.findByUser(userId);
+  const myConversations = await conversationRepository.findByUser(userId);
+  return conversationMapper.toConversationList(myConversations);
 };
 
 // ============================== ADD PARTICIPANT ==============================
