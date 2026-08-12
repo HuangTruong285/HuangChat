@@ -1,6 +1,8 @@
 import { Search, LogOut, MessageSquare, Settings, User } from "lucide-react";
 import avatar from "../../assets/image/Avatar.jpg";
 
+import { getMyConversations } from "../../api/conversation.api";
+
 // Mock data
 const conversations = [
   {
@@ -26,7 +28,26 @@ const conversations = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onSelectConversation }) {
+  const [conversations, setConversations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        const response = await getMyConversations();
+        console.log("CONVERSATIONS:", response.data);
+
+        setConversations(response.data.data);
+      } catch (error) {
+        console.error("Failed to load conversations:", error);
+      } finally {
+        setloading(false);
+      }
+    };
+
+    loadConversations();
+  }, []);
   return (
     <div className="flex w-80 flex-col border-r border-slate-800 bg-slate-900 text-slate-100">
       {/*Current User */}
@@ -70,6 +91,7 @@ export default function Sidebar() {
         {conversations.map((conversation) => (
           <div
             key={conversation.id}
+            onClick={() => onSelectConversation(conversation)}
             className="flex cursor-pointer items-center space-x-3 rounded-xl p-3 text-white hover:bg-slate-800"
           >
             <div className="relative">

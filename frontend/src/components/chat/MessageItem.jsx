@@ -18,7 +18,7 @@ export default function MessageItem({ message }) {
         <div
           className={`rounded-2xl p-3 text-sm text-slate-200 ${
             isMine
-              ? "rouded-tr-none bg-indigo-600"
+              ? "rounded-tr-none bg-indigo-600"
               : "rounded-tl-none bg-slate-800"
           }`}
         >

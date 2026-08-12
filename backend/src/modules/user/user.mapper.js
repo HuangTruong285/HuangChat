@@ -1,6 +1,6 @@
 // Thông tin user của chính chủ tài khoản
 export const toCurrentUser = (user) => ({
-  id: user.id,
+  id: user._id,
   username: user.username,
   email: user.email,
   displayName: user.displayName,
@@ -12,7 +12,7 @@ export const toCurrentUser = (user) => ({
 
 // Thông tin public của user
 export const toPublicUser = (user) => ({
-  id: user.id,
+  id: user._id,
   username: user.username,
   displayName: user.displayName,
   avatar: user.avatar,
