@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import * as conversationService from "../../services/conversation.service";
 
-import Sidebar from "./Sidebar";
+import ConversationSidebar from "./ConversationSidebar";
 import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
@@ -68,9 +68,36 @@ const initialMessages = {
 export default function ChatLayout() {
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
+
   const [activeConversation, setActiveConversation] = useState(null);
+
   const [messages, setMessages] = useState(initialMessages);
+
   const [messageInput, setMessageInput] = useState("");
+
+  // ==============================
+  // LOAD CONVERSATIONS
+  // ==============================
+
+  useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        const data = await conversationService.getMyConversations();
+
+        setConversations(data);
+      } catch (error) {
+        console.error("Failed to load conversations:", error);
+      } finally {
+        setLoadingConversations(false);
+      }
+    };
+
+    loadConversations();
+  }, []);
+
+  // ==============================
+  // SEND MESSAGE
+  // ==============================
 
   const handleSendMessage = () => {
     if (!messageInput.trim()) return;
@@ -81,7 +108,7 @@ export default function ChatLayout() {
       id: Date.now(),
       sender: "me",
       content: messageInput.trim(),
-      time: new Date().toLocaleString([], {
+      time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
@@ -99,26 +126,10 @@ export default function ChatLayout() {
     setMessageInput("");
   };
 
-  useEffect(() => {
-    const loadConversations = async () => {
-      try {
-        const data = await conversationService.getMyConversations();
-        console.log(data);
-        setConversations(data);
-      } catch (error) {
-        console.error("Failed to load conversations:", error);
-      } finally {
-        setLoadingConversations(false);
-      }
-    };
-
-    loadConversations();
-  }, []);
-
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <Sidebar
+    <div className="flex h-full">
+      {/* Conversation Sidebar */}
+      <ConversationSidebar
         conversations={conversations}
         loading={loadingConversations}
         activeConversation={activeConversation}
@@ -126,14 +137,16 @@ export default function ChatLayout() {
       />
 
       {/* Chat */}
-      <main className="flex min-w-0 flex-1 flex-col bg-slate-900">
+      <main className="bg-background flex min-w-0 flex-1 flex-col">
         {activeConversation ? (
           <>
             <ChatHeader conversation={activeConversation} />
+
             <MessageList
               conversation={activeConversation}
               messages={messages}
             />
+
             <MessageInput
               value={messageInput}
               onChange={setMessageInput}
@@ -143,10 +156,11 @@ export default function ChatLayout() {
         ) : (
           <div className="flex flex-1 items-center justify-center">
             <div className="text-center">
-              <h2 className="text-lg font-semibold text-slate-500">
+              <h2 className="text-muted-foreground text-lg font-semibold">
                 Chọn một cuộc trò chuyện
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+
+              <p className="text-muted-foreground mt-1 text-sm">
                 Chọn một người để bắt đầu trò chuyện
               </p>
             </div>
