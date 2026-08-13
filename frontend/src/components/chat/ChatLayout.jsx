@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import * as conversationService from "../../services/conversation.service";
 
 import Sidebar from "./Sidebar";
 import ChatHeader from "./ChatHeader";
@@ -65,6 +66,8 @@ const initialMessages = {
 };
 
 export default function ChatLayout() {
+  const [conversations, setConversations] = useState([]);
+  const [loadingConversations, setLoadingConversations] = useState(true);
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState(initialMessages);
   const [messageInput, setMessageInput] = useState("");
@@ -96,10 +99,31 @@ export default function ChatLayout() {
     setMessageInput("");
   };
 
+  useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        const data = await conversationService.getMyConversations();
+        console.log(data);
+        setConversations(data);
+      } catch (error) {
+        console.error("Failed to load conversations:", error);
+      } finally {
+        setLoadingConversations(false);
+      }
+    };
+
+    loadConversations();
+  }, []);
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <Sidebar onSelectConversation={setActiveConversation} />
+      <Sidebar
+        conversations={conversations}
+        loading={loadingConversations}
+        activeConversation={activeConversation}
+        onSelectConversation={setActiveConversation}
+      />
 
       {/* Chat */}
       <main className="flex min-w-0 flex-1 flex-col bg-slate-900">

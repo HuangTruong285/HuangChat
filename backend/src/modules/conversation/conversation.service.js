@@ -80,21 +80,23 @@ export const createGroupConversation = async ({
 };
 
 // ============================== GET CONVERSATION ==============================
+// Lấy cuộc trò chuyện được chọn
 export const getConversation = async (conversationId) => {
-  // Lấy cuộc trò chuyện
   const conversation = await conversationRepository.findById(conversationId);
   if (!conversation) {
     throw ApiError.notFound("Conversation not found");
   }
 
-  return conversation;
+  return conversationMapper.toConversationDetail(conversation);
 };
 
 // ============================== GET MY CONVERSATIONS ==============================
 // Lấy tất cả cuộc trò chuyện của tôi
 export const getMyConversations = async (userId) => {
   const myConversations = await conversationRepository.findByUser(userId);
-  return conversationMapper.toConversationList(myConversations);
+  return myConversations.map((conversation) =>
+    conversationMapper.toConversationListItem(conversation, userId),
+  );
 };
 
 // ============================== ADD PARTICIPANT ==============================

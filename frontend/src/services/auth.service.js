@@ -26,8 +26,6 @@ export const refresh = async () => {
   const { accessToken } = response.data;
 
   setAccessToken(accessToken);
-
-  return accessToken;
 };
 
 // ============================== LOGOUT ==============================
