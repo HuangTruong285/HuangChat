@@ -20,9 +20,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
 // ============================== UPDATE AVATAR ==============================
 export const updateAvatar = asyncHandler(async (req, res) => {
-  const { avatar } = req.body;
-
-  const user = await userService.updateAvatar(req.user.id, avatar);
+  const user = await userService.updateAvatar(req.user.id, req.file);
 
   return ApiResponse.ok(res, "Avatar updated successfully", user);
 });

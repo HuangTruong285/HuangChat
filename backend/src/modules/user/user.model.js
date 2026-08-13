@@ -32,7 +32,12 @@ const userSchema = new mongoose.Schema(
     },
 
     // Đường dẫn ảnh đại diện (URL)
-    avatar: {
+    avatarUrl: {
+      type: String,
+      default: null,
+    },
+
+    avatarId: {
       type: String,
       default: null,
     },

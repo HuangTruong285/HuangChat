@@ -1,13 +1,15 @@
 import { Router } from "express";
 
 import * as userController from "./user.controller.js";
-import validate from "../../middleware/validate.middleware.js";
 import {
   updateProfileSchema,
   updateAvatarSchema,
   updateStatusSchema,
   searchUsersSchema,
 } from "./user.validator.js";
+
+import validate from "../../middleware/validate.middleware.js";
+import upload from "../../middleware/upload.middleware.js";
 
 const router = Router();
 
@@ -24,6 +26,7 @@ router.patch(
 // Cập nhật avatar
 router.patch(
   "/avatar",
+  upload.single("avatar"),
   validate(updateAvatarSchema),
   userController.updateAvatar,
 );

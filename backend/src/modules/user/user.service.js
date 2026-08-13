@@ -1,4 +1,5 @@
 import ApiError from "../../utils/ApiError.js";
+import * as cloudinary from "../../utils/cloudinary.js";
 
 import * as userRepository from "./user.repository.js";
 import * as userMapper from "./user.mapper.js";
@@ -27,14 +28,32 @@ export const updateProfile = async (userId, data) => {
 
 // ============================== UPDATE AVATAR ==============================
 
-export const updateAvatar = async (userId, avatar) => {
-  const user = await userRepository.updateProfile(userId, {
-    avatar,
-  });
+export const updateAvatar = async (userId, file) => {
+  if (!file) {
+    throw Api.Error.badRequest("Avatar is required");
+  }
+
+  const user = await userRepository.findById(userId);
   if (!user) {
     throw ApiError.notFound("User not found");
   }
-  return userMapper.toCurrentUser(user);
+
+  const result = await cloudinary.uploadImage(file.path, {
+    folder: "chatapp/avatars",
+  });
+
+  const oldAvatarId = user.avatarId;
+
+  const updatedUser = await userRepository.updateProfile(userId, {
+    avatarUrl: result.secure_url,
+    avatarId: result.public_id,
+  });
+
+  if (oldAvatarId) {
+    await cloudinaryService.deleteImage(user.avatarId);
+  }
+
+  return userMapper.toCurrentUser(updatedUser);
 };
 
 // ============================== UPDATE STATUS ==============================
