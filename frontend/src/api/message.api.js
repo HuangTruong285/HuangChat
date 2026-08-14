@@ -1,17 +1,17 @@
 import api from "./axios";
 import { API } from "../constants/api";
 
-export const getMessages = (conversationId) => {
-  const response = api.get(API.MESSAGE.LIST(conversationId));
-  return response;
+export const sendMessage = async (data) => {
+  const response = await api.post(API.MESSAGE.CREATE, data);
+  return response.data;
 };
 
-export const sendMessage = (data) => {
-  const response = api.post(API.MESSAGE.CREATE, data);
-  return response;
+export const getMessages = async (conversationId) => {
+  const response = await api.get(API.MESSAGE.LIST(conversationId));
+  return response.data;
 };
 
-export const deleteMessage = (messageId) => {
-  const response = api.delete(API.MESSAGE.DELETE(messageId));
-  return response;
+export const deleteMessage = async (messageId) => {
+  const response = await api.delete(API.MESSAGE.DELETE(messageId));
+  return response.data;
 };

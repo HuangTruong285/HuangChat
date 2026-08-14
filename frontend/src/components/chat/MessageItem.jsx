@@ -1,5 +1,5 @@
 export default function MessageItem({ message }) {
-  const isMine = message.sender === "me";
+  const isMine = message.isMine;
 
   return (
     <div
@@ -22,7 +22,11 @@ export default function MessageItem({ message }) {
               : "rounded-tl-none bg-slate-800"
           }`}
         >
-          {message.content}
+          {message.type === "text" && <p>{message.content}</p>}
+
+          {message.type === "image" && (
+            <img src={message.imgUrl} alt="" className="max-w-full rounded" />
+          )}
         </div>
         <span
           className={`mt-1 block text-[10px] text-slate-500 ${

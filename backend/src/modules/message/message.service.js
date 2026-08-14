@@ -1,4 +1,5 @@
 import * as messageRepository from "./message.repository.js";
+import * as messageMapper from "./message.mapper.js";
 import { conversationRepository } from "../conversation/index.js";
 
 import ApiError from "../../utils/ApiError.js";
@@ -59,28 +60,30 @@ export const sendMessage = async ({
     unreadCounts,
   });
 
-  return message;
+  return messageMapper.toMessage(message);
 };
 
-// ============================== GET MESSAGE ==============================
+// ============================== GET MESSAGES ==============================
 // Lấy tin nhắn từ cuộc hội thoại (phân trang)
 export const getMessages = async (
   conversationId,
   { page = 1, limit = 30 } = {},
 ) => {
-  // Kiêmt tra xem cuộc trò chuyện có tồn tại
+  // Kiểm tra xem cuộc trò chuyện có tồn tại
   const conversation = await conversationRepository.findById(conversationId);
   if (!conversation) {
     throw new ApiError(404, "Conversation not found");
   }
 
-  return messageRepository.findByConversation(conversationId, {
+  const messages = await messageRepository.findByConversation(conversationId, {
     page,
     limit,
   });
+
+  return messageMapper.toMessageList(messages);
 };
 
-// ============================== SEND MESSAGE ==============================
+// ============================== DELETE MESSAGE ==============================
 // Xoá tin nhắn
 export const deleteMessage = async (messageId) => {
   // Kiểm tra tin nhắn có tồn tại không

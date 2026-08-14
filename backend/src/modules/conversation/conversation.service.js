@@ -79,6 +79,15 @@ export const createGroupConversation = async ({
   return conversationMapper.toConversation(groupConversation);
 };
 
+// ============================== GET MY CONVERSATIONS ==============================
+// Lấy tất cả cuộc trò chuyện của tôi
+export const getMyConversations = async (userId) => {
+  const myConversations = await conversationRepository.findByUser(userId);
+  return myConversations.map((conversation) =>
+    conversationMapper.toConversationListItem(conversation, userId),
+  );
+};
+
 // ============================== GET CONVERSATION ==============================
 // Lấy cuộc trò chuyện được chọn
 export const getConversation = async (conversationId) => {
@@ -87,16 +96,7 @@ export const getConversation = async (conversationId) => {
     throw ApiError.notFound("Conversation not found");
   }
 
-  return conversationMapper.toConversationDetail(conversation);
-};
-
-// ============================== GET MY CONVERSATIONS ==============================
-// Lấy tất cả cuộc trò chuyện của tôi
-export const getMyConversations = async (userId) => {
-  const myConversations = await conversationRepository.findByUser(userId);
-  return myConversations.map((conversation) =>
-    conversationMapper.toConversationListItem(conversation, userId),
-  );
+  return conversationMapper.toConversation(conversation);
 };
 
 // ============================== ADD PARTICIPANT ==============================
@@ -121,9 +121,14 @@ export const addParticipant = async (conversationId, userId) => {
   }
 
   // Thêm thành viên vào nhóm
-  return conversationRepository.addParticipant(conversationId, {
-    userId,
-  });
+  const newConversation = conversationRepository.addParticipant(
+    conversationId,
+    {
+      userId,
+    },
+  );
+
+  return conversationMapper.toParticipants(conversation.participants);
 };
 
 // ============================== REMOVE PARTICIPANT ==============================

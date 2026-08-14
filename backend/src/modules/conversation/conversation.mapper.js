@@ -1,5 +1,10 @@
-// ============================== PRIMITIVE MAPPER ==============================
 // Trả về một thành viên
+/*
+ * userId : Id của thành viên
+ * displayName : Tên hiện thị của thành viên
+ * avatarUrl : Link tới avatar của thành viện
+ * joinedAt : Thời gian thành viên tham gia cuộc hội thoại
+ */
 export const toParticipant = (participant) => {
   if (!participant) return null;
 
@@ -13,7 +18,17 @@ export const toParticipant = (participant) => {
   };
 };
 
+// Trả về danh sách thành viên
+export const toParticipants = (participant = []) => {
+  return participants.map(toParticipant);
+};
+
 // Trả về một nhóm
+/*
+ * name : Tên nhóm
+ * avatarUrl : Link avatar nhóm
+ * createdBy : Id người tạo nhóm
+ */
 export const toGroup = (group) => {
   if (!group) return null;
 
@@ -27,10 +42,16 @@ export const toGroup = (group) => {
 };
 
 // Trả về tin nhắn gần nhất
+/*
+ * id : Id tin nhắn gần nhất
+ * content : Nội dung tin nhắn gần nhất
+ * senderId : Id người gửi tin nhắn gần nhất
+ * createdAt : Thời gian tạo tin nhắn gần nhất
+ */
 export const toLastMessage = (lastMessage) => {
   if (!lastMessage) return null;
   return {
-    id: lastMessage.id?.toString() ?? null,
+    id: lastMessage._id?.toString() ?? null,
     content: lastMessage.content ?? "",
     senderId: lastMessage.senderId?._id
       ? lastMessage.senderId._id.toString()
@@ -59,7 +80,7 @@ export const toConversation = (conversation) => {
   return {
     id: conversation._id?.toString(),
     type: conversation.type,
-    participants: conversation.participants?.map(toParticipant) ?? [],
+    participants: toParticipants(conversation.participants),
     group: toGroup(conversation.group),
     lastMessage: toLastMessage(conversation.lastMessage),
     lastMessageAt: conversation.lastMessageAt ?? null,

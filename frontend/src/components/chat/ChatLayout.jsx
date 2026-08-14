@@ -1,87 +1,32 @@
 import { useState, useEffect } from "react";
-import * as conversationService from "../../services/conversation.service";
 
 import ConversationSidebar from "./ConversationSidebar";
 import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
+import useAuth from "../../hook/useAuth";
 
-const initialMessages = {
-  1: [
-    {
-      id: 1,
-      sender: "other",
-      content: "Hôm nay thế nào?",
-      time: "10:30",
-    },
-    {
-      id: 2,
-      sender: "me",
-      content: "Tớ khỏe, còn cậu?",
-      time: "10:31",
-    },
-    {
-      id: 3,
-      sender: "other",
-      content: "Tớ cũng khỏe 😄",
-      time: "10:32",
-    },
-    {
-      id: 4,
-      sender: "me",
-      content: "Tối nay đi chơi không?",
-      time: "10:33",
-    },
-  ],
-
-  2: [
-    {
-      id: 5,
-      sender: "other",
-      content: "Có rảnh không?",
-      time: "09:10",
-    },
-    {
-      id: 6,
-      sender: "me",
-      content: "Có, sao vậy?",
-      time: "09:12",
-    },
-  ],
-
-  3: [
-    {
-      id: 7,
-      sender: "other",
-      content: "Tối nay chơi không?",
-      time: "08:40",
-    },
-    {
-      id: 8,
-      sender: "me",
-      content: "Ok 👍",
-      time: "08:42",
-    },
-  ],
-};
+import * as conversationService from "../../services/conversation.service";
+import * as messageService from "../../services/message.service";
 
 export default function ChatLayout() {
+  const { user } = useAuth();
   const [conversations, setConversations] = useState([]);
-  const [loadingConversations, setLoadingConversations] = useState(true);
-
   const [activeConversation, setActiveConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
 
-  const [messages, setMessages] = useState(initialMessages);
-
-  const [messageInput, setMessageInput] = useState("");
+  const [loadingConversations, setLoadingConversations] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   // ==============================
   // LOAD CONVERSATIONS
   // ==============================
-
   useEffect(() => {
     const loadConversations = async () => {
       try {
+        setLoadingConversations(true);
+
         const data = await conversationService.getMyConversations();
 
         setConversations(data);
@@ -96,34 +41,62 @@ export default function ChatLayout() {
   }, []);
 
   // ==============================
+  // SELECT CONVERSATION
+  // ==============================
+  const handleSelectConversation = async (conversation) => {
+    try {
+      setActiveConversation(conversation);
+
+      setLoadingMessages(true);
+
+      const data = await messageService.getMessageByConversation(
+        conversation.id,
+      );
+
+      console.log(data);
+
+      const mappedMessages = data.map((message) => ({
+        ...message,
+        isMine: message.senderId === user.id,
+      }));
+
+      setMessages(mappedMessages);
+    } catch (error) {
+      console.error(error);
+
+      setMessages([]);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  // ==============================
   // SEND MESSAGE
   // ==============================
-
-  const handleSendMessage = () => {
-    if (!messageInput.trim()) return;
+  const handleSendMessage = async (content) => {
+    if (!content.trim()) return;
 
     if (!activeConversation) return;
 
-    const newMessage = {
-      id: Date.now(),
-      sender: "me",
-      content: messageInput.trim(),
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+    try {
+      setSendingMessage(true);
 
-    setMessages((prevMessages) => ({
-      ...prevMessages,
+      const newMessage = await messageService.sendMessage({
+        conversationId: activeConversation.id,
+        type: "text",
+        content: content.trim(),
+      });
 
-      [activeConversation.id]: [
-        ...(prevMessages[activeConversation.id] ?? []),
-        newMessage,
-      ],
-    }));
-
-    setMessageInput("");
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { ...newMessage, isMine: true },
+      ]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSendingMessage(false);
+      setMessageInput("");
+    }
   };
 
   return (
@@ -133,7 +106,7 @@ export default function ChatLayout() {
         conversations={conversations}
         loading={loadingConversations}
         activeConversation={activeConversation}
-        onSelectConversation={setActiveConversation}
+        onSelectConversation={handleSelectConversation}
       />
 
       {/* Chat */}
@@ -142,15 +115,11 @@ export default function ChatLayout() {
           <>
             <ChatHeader conversation={activeConversation} />
 
-            <MessageList
-              conversation={activeConversation}
-              messages={messages}
-            />
+            <MessageList messages={messages} loading={loadingMessages} />
 
             <MessageInput
-              value={messageInput}
-              onChange={setMessageInput}
-              onSend={handleSendMessage}
+              onSendMessage={handleSendMessage}
+              disabled={sendingMessage}
             />
           </>
         ) : (
