@@ -1,9 +1,9 @@
 import { createContext, useState, useEffect } from "react";
 
-import * as authService from "../services/auth.service";
-import * as userService from "../services/user.service";
+import * as authService from "./auth.service";
+import * as userService from "../user/user.service";
 
-import { getAccessToken, removeAccessToken } from "../utils/token";
+import { getAccessToken, removeAccessToken } from "../../utils/token";
 
 export const AuthContext = createContext(null);
 

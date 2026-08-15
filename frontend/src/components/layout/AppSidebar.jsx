@@ -1,6 +1,6 @@
 import { MessageSquare, User, Settings, LogOut } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import useAuth from "../../hook/useAuth";
+import useAuth from "../../features/auth/useAuth";
 
 export default function AppSidebar() {
   const navigate = useNavigate();

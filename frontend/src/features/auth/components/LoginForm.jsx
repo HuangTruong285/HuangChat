@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import useAuth from "../../hook/useAuth";
+import useAuth from "../useAuth";
 
 export default function LoginForm({ onSwitchForm }) {
-  const [formData, setFormData] = useState({ identifier: "", password: "" });
+  const [formData, setFormData] = useState({
+    identifier: "",
+    password: "",
+  });
   const [error, setError] = useState("");
 
   const { login, loading } = useAuth();
@@ -33,6 +36,7 @@ export default function LoginForm({ onSwitchForm }) {
       setError("Tên đăng nhập hoặc email không được để trống");
       return;
     }
+
     if (!formData.password) {
       setError("Mật khẩu không được để trống");
       return;
@@ -46,15 +50,23 @@ export default function LoginForm({ onSwitchForm }) {
         err.response?.data?.message ||
         err.message ||
         "Đăng nhập thất bại. Vui lòng thử lại!";
+
       setError(errorMessage);
     }
   };
 
   return (
-    <div className="w-full max-w-md rounded-xl bg-white p-8 shadow">
-      <h2 className="text-3xl font-bold text-gray-900">Đăng nhập</h2>
-      <p className="mt-2 text-gray-500">Chào mừng bạn quay trở lại</p>
+    <div className="border-border bg-card shadow-primary/5 w-full max-w-md rounded-2xl border p-8 shadow-lg">
+      {/* ============================== HEADER ============================== */}
+      <div>
+        <h2 className="text-card-foreground text-3xl font-bold tracking-tight">
+          Đăng nhập
+        </h2>
 
+        <p className="text-muted-foreground mt-2">Chào mừng bạn quay trở lại</p>
+      </div>
+
+      {/* ============================== FORM ============================== */}
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
         <div>
           <input
@@ -64,7 +76,7 @@ export default function LoginForm({ onSwitchForm }) {
             disabled={loading}
             value={formData.identifier}
             onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-3 transition outline-none focus:border-indigo-600 disabled:bg-gray-100"
+            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-ring/30 w-full rounded-xl border px-4 py-3 transition outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
@@ -76,28 +88,33 @@ export default function LoginForm({ onSwitchForm }) {
             disabled={loading}
             value={formData.password}
             onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-3 transition outline-none focus:border-indigo-600 disabled:bg-gray-100"
+            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-ring/30 w-full rounded-xl border px-4 py-3 transition outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
-        {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+        {/* ============================== ERROR ============================== */}
+        {error && (
+          <p className="text-destructive text-sm font-medium">{error}</p>
+        )}
 
+        {/* ============================== SUBMIT ============================== */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-indigo-600 p-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-primary text-primary-foreground shadow-primary/15 hover:bg-primary/90 w-full rounded-xl p-3 font-semibold shadow-md transition disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-gray-600">
+      {/* ============================== SWITCH ============================== */}
+      <p className="text-muted-foreground mt-6 text-center text-sm">
         Chưa có tài khoản?{" "}
         <button
           onClick={onSwitchForm}
           type="button"
           disabled={loading}
-          className="font-medium text-indigo-600 hover:underline disabled:opacity-50"
+          className="text-primary font-semibold transition hover:underline disabled:cursor-not-allowed disabled:opacity-50"
         >
           Đăng ký
         </button>

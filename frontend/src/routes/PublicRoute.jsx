@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useAuth from "../hook/useAuth";
+import useAuth from "../features/auth/useAuth";
 import LoadingPage from "../pages/LoadingPage";
 
 export default function PublicRoute() {

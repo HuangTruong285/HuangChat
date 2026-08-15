@@ -1,4 +1,4 @@
-import avatar from "../../assets/image/Avatar.jpg";
+import avatar from "../../../assets/image/Avatar.jpg";
 
 export default function ConversationItem({ conversation, isActive, onClick }) {
   return (

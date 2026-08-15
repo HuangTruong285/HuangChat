@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../../hook/useAuth";
+import useAuth from "../useAuth";
 
 export default function RegisterForm({ onSwitchForm }) {
   const [formData, setFormData] = useState({
@@ -10,15 +10,18 @@ export default function RegisterForm({ onSwitchForm }) {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+
   const { register, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
     if (error) {
       setError("");
     }
@@ -32,22 +35,27 @@ export default function RegisterForm({ onSwitchForm }) {
       setError("Username không được để trống");
       return;
     }
+
     if (!formData.email.trim()) {
       setError("Email không được để trống");
       return;
     }
+
     if (!formData.password) {
       setError("Mật khẩu không được để trống");
       return;
     }
+
     if (formData.password.length < 6) {
       setError("Mật khẩu phải có ít nhất 6 ký tự");
       return;
     }
+
     if (!formData.confirmPassword) {
       setError("Vui lòng xác nhận lại mật khẩu");
       return;
     }
+
     if (formData.password !== formData.confirmPassword) {
       setError("Mật khẩu xác nhận không trùng khớp");
       return;
@@ -55,6 +63,7 @@ export default function RegisterForm({ onSwitchForm }) {
 
     try {
       const { confirmPassword, ...registerPayload } = formData;
+
       await register(registerPayload);
       navigate("/chat", { replace: true });
     } catch (err) {
@@ -62,15 +71,23 @@ export default function RegisterForm({ onSwitchForm }) {
         err.response?.data?.message ||
         err.message ||
         "Đăng ký thất bại. Vui lòng thử lại!";
+
       setError(errorMessage);
     }
   };
 
   return (
-    <div className="w-full max-w-md rounded-xl bg-white p-8 shadow">
-      <h2 className="text-3xl font-bold text-gray-900">Đăng ký</h2>
-      <p className="mt-2 text-gray-500">Tạo tài khoản mới</p>
+    <div className="border-border bg-card shadow-primary/5 w-full max-w-md rounded-2xl border p-8 shadow-lg">
+      {/* ============================== HEADER ============================== */}
+      <div>
+        <h2 className="text-card-foreground text-3xl font-bold tracking-tight">
+          Đăng ký
+        </h2>
 
+        <p className="text-muted-foreground mt-2">Tạo tài khoản mới</p>
+      </div>
+
+      {/* ============================== FORM ============================== */}
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
         <div>
           <input
@@ -80,7 +97,7 @@ export default function RegisterForm({ onSwitchForm }) {
             disabled={loading}
             value={formData.username}
             onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-3 transition outline-none focus:border-indigo-600 disabled:bg-gray-100"
+            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-ring/30 w-full rounded-xl border px-4 py-3 transition outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
@@ -92,7 +109,7 @@ export default function RegisterForm({ onSwitchForm }) {
             disabled={loading}
             value={formData.email}
             onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-3 transition outline-none focus:border-indigo-600 disabled:bg-gray-100"
+            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-ring/30 w-full rounded-xl border px-4 py-3 transition outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
@@ -104,7 +121,7 @@ export default function RegisterForm({ onSwitchForm }) {
             disabled={loading}
             value={formData.password}
             onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-3 transition outline-none focus:border-indigo-600 disabled:bg-gray-100"
+            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-ring/30 w-full rounded-xl border px-4 py-3 transition outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
@@ -116,28 +133,33 @@ export default function RegisterForm({ onSwitchForm }) {
             disabled={loading}
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-3 transition outline-none focus:border-indigo-600 disabled:bg-gray-100"
+            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-ring/30 w-full rounded-xl border px-4 py-3 transition outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
-        {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+        {/* ============================== ERROR ============================== */}
+        {error && (
+          <p className="text-destructive text-sm font-medium">{error}</p>
+        )}
 
+        {/* ============================== SUBMIT ============================== */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-indigo-600 p-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-primary text-primary-foreground shadow-primary/15 hover:bg-primary/90 w-full rounded-xl p-3 font-semibold shadow-md transition disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Đang xử lý..." : "Đăng ký"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-gray-600">
+      {/* ============================== SWITCH ============================== */}
+      <p className="text-muted-foreground mt-6 text-center text-sm">
         Đã có tài khoản?{" "}
         <button
           onClick={onSwitchForm}
           type="button"
           disabled={loading}
-          className="font-medium text-indigo-600 hover:underline disabled:opacity-50"
+          className="text-primary font-semibold transition hover:underline disabled:cursor-not-allowed disabled:opacity-50"
         >
           Đăng nhập
         </button>

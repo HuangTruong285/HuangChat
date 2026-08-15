@@ -1,5 +1,5 @@
 import { Search, LogOut } from "lucide-react";
-import avatar from "../../assets/image/Avatar.jpg";
+import avatar from "../../../assets/image/Avatar.jpg";
 
 import ConversationItem from "./ConversationItem";
 

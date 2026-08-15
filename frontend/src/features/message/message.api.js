@@ -1,5 +1,5 @@
-import api from "./axios";
-import { API } from "../constants/api";
+import api from "../../lib/axios";
+import { API } from "../../constants/api";
 
 export const sendMessage = async (data) => {
   const response = await api.post(API.MESSAGE.CREATE, data);

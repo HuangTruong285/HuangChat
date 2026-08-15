@@ -1,5 +1,5 @@
-import api from "./axios";
-import { API } from "../constants/api";
+import api from "../../lib/axios";
+import { API } from "../../constants/api";
 
 export const getMyConversations = async () => {
   const response = await api.get(API.CONVERSATION.LIST);

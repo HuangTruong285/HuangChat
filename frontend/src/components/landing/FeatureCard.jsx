@@ -1,11 +1,22 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 export default function FeatureCard({ icon, title, description }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-8 transition-all duration-300 hover:border-indigo-200 hover:shadow-lg hover:shadow-pink-500/5">
-      <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-2xl text-indigo-600">
-        {icon}
-      </div>
-      <h3 className="mb-2 text-xl font-bold text-slate-900">{title}</h3>
-      <p className="text-sm leading-relaxed text-slate-600">{description}</p>
-    </div>
+    <Card className="group border-border bg-card hover:border-primary/30 hover:shadow-primary/10 rounded-3xl p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+      <CardHeader>
+        {/* Icon */}
+        <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground flex size-12 items-center justify-center rounded-2xl transition-colors duration-300">
+          {icon}
+        </div>
+
+        <CardTitle className="mt-2 text-xl font-semibold">{title}</CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <p className="text-muted-foreground text-justify text-sm leading-relaxed">
+          {description}
+        </p>
+      </CardContent>
+    </Card>
   );
 }

@@ -10,7 +10,7 @@ import ChatPage from "./pages/ChatPage";
 import FriendPage from "./pages/FriendPage";
 import SettingPage from "./pages/SettingPage";
 
-import useAuth from "./hook/useAuth";
+import useAuth from "./features/auth/useAuth";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";

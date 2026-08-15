@@ -1,4 +1,4 @@
-import * as userApi from "../api/user.api";
+import * as userApi from "./user.api";
 
 // ============================== GET ME ==============================
 export const getMe = async () => {

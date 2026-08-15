@@ -5,10 +5,10 @@ import Footer from "../components/landing/Footer";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="bg-background text-foreground selection:bg-primary/20 selection:text-primary min-h-screen font-sans">
       <Navbar />
 
-      <main>
+      <main className="overflow-hidden">
         <HeroSection />
         <FeatureSection />
       </main>

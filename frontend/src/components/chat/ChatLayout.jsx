@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 
-import ConversationSidebar from "./ConversationSidebar";
-import ChatHeader from "./ChatHeader";
-import MessageList from "./MessageList";
-import MessageInput from "./MessageInput";
-import useAuth from "../../hook/useAuth";
+import ConversationSidebar from "../../features/conversation/components/ConversationSidebar";
+import ChatHeader from "../../features/message/components/ChatHeader";
+import MessageList from "../../features/message/components/MessageList";
+import MessageInput from "../../features/message/components/MessageInput";
+import useAuth from "../../features/auth/useAuth";
 
-import * as conversationService from "../../services/conversation.service";
-import * as messageService from "../../services/message.service";
+import * as conversationService from "../../features/conversation/conversation.service";
+import * as messageService from "../../features/message/message.service";
 
 export default function ChatLayout() {
   const { user } = useAuth();
@@ -20,7 +20,7 @@ export default function ChatLayout() {
   const [sendingMessage, setSendingMessage] = useState(false);
 
   // ==============================
-  // LOAD CONVERSATIONS
+  // LOAD CONVERSATIONSc
   // ==============================
   useEffect(() => {
     const loadConversations = async () => {

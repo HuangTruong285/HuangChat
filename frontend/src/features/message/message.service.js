@@ -1,4 +1,4 @@
-import * as messageApi from "../api/message.api";
+import * as messageApi from "./message.api";
 
 export const sendMessage = async (data) => {
   const response = messageApi.sendMessage(data);

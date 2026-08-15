@@ -1,4 +1,4 @@
-import * as conversationApi from "../api/conversation.api";
+import * as conversationApi from "./conversation.api";
 
 export const getMyConversations = async () => {
   const response = await conversationApi.getMyConversations();

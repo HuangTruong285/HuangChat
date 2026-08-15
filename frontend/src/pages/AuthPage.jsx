@@ -1,6 +1,6 @@
 import { useState } from "react";
-import LoginForm from "../components/auth/LoginForm";
-import RegisterForm from "../components/auth/RegisterForm";
+import LoginForm from "../features/auth/components/LoginForm";
+import RegisterForm from "../features/auth/components/RegisterForm";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,17 +9,20 @@ export default function AuthPage() {
   const showRegister = () => setIsLogin(false);
 
   return (
-    <div className="flex min-h-screen">
-      <div className="hidden flex-1 items-center justify-center bg-indigo-600 text-white lg:flex">
-        <div>
-          <h1 className="text-5xl font-bold">Huang Chat</h1>
-          <p className="mt-4 text-lg">
+    <div className="bg-background flex min-h-screen">
+      {/* ============================== BRAND PANEL ============================== */}
+      <div className="bg-primary text-primary-foreground relative hidden flex-1 items-center justify-center overflow-hidden lg:flex">
+        <div className="relative z-10 px-10 text-center">
+          <h1 className="text-5xl font-bold tracking-tight">Huang Chat</h1>
+
+          <p className="text-primary-foreground/80 mt-4 text-lg">
             Kết nối với mọi người theo thời gian thực
           </p>
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-gray-50">
+      {/* ============================== AUTH PANEL ============================== */}
+      <div className="bg-background flex flex-1 items-center justify-center px-6 py-10">
         {isLogin ? (
           <LoginForm onSwitchForm={showRegister} />
         ) : (

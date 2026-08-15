@@ -1,5 +1,5 @@
-import * as authApi from "../api/auth.api";
-import { setAccessToken, removeAccessToken } from "../utils/token";
+import * as authApi from "./auth.api";
+import { setAccessToken, removeAccessToken } from "../../utils/token";
 
 // ============================== REGISTER ==============================
 export const register = async (registerData) => {
