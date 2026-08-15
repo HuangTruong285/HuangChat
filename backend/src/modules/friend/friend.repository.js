@@ -3,19 +3,19 @@ import Friend from "./friend.model.js";
 // ============================== CREATE ==============================
 
 // Tạo quan hệ bạn bè
-export const create = (data) => {
+export const create = async (data) => {
   return Friend.create(data);
 };
 
 // ============================== READ / FIND ==============================
 
 // Tìm theo id
-export const findById = (id) => {
+export const findById = async (id) => {
   return Friend.findById(id);
 };
 
 // Tìm quan hệ giữa 2 user
-export const findFriend = (userA, userB) => {
+export const findFriend = async (userA, userB) => {
   return Friend.findOne({
     $or: [
       { userA, userB },
@@ -25,7 +25,7 @@ export const findFriend = (userA, userB) => {
 };
 
 // Lấy danh sách bạn bè của user
-export const findFriends = (userId) => {
+export const findFriends = async (userId) => {
   return Friend.find({
     $or: [{ userA: userId }, { userB: userId }],
   })
@@ -34,7 +34,7 @@ export const findFriends = (userId) => {
 };
 
 // Đếm số bạn bè
-export const countFriends = (userId) => {
+export const countFriends = async (userId) => {
   return Friend.countDocuments({
     $or: [{ userA: userId }, { userB: userId }],
   });
@@ -43,6 +43,6 @@ export const countFriends = (userId) => {
 // ============================== DELETE ==============================
 
 // Xóa quan hệ bạn bè
-export const deleteById = (id) => {
+export const deleteById = async (id) => {
   return Friend.findByIdAndDelete(id);
 };

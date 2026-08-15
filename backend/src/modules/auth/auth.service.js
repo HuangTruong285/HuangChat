@@ -1,6 +1,6 @@
 import ApiError from "../../utils/ApiError.js";
-import { generateAccessToken } from "../../utils/jwt.js";
 import { hashPassword, comparePassword } from "../../utils/password.js";
+import { generateAccessToken } from "../../utils/jwt.js";
 import {
   generateRefreshToken,
   hashRefreshToken,
@@ -80,9 +80,13 @@ export const login = async ({ identifier, password }) => {
 };
 
 // ============================== REFRESH ==============================
-export const refresh = async (refreshToken) => {
+export const refresh = async (oldRefreshToken) => {
+  if (!oldRefreshToken) {
+    throw ApiError.unauthorized("Refresh token is required");
+  }
+
   // Hash Refresh Token trước khi tìm kiếm trong DB
-  const tokenHash = await hashRefreshToken(refreshToken);
+  const tokenHash = await hashRefreshToken(oldRefreshToken);
 
   // Tìm Refresh Token trong DB
   const session = await sessionRepository.findByTokenHash(tokenHash);
@@ -104,6 +108,9 @@ export const refresh = async (refreshToken) => {
 
 // ============================== LOGOUT ==============================
 export const logout = async (refreshToken) => {
+  if (!refreshToken) {
+    return;
+  }
   // Hash Refresh Token trước khi tìm kiếm trong DB
   const tokenHash = await hashRefreshToken(refreshToken);
 

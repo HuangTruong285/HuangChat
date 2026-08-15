@@ -17,14 +17,12 @@ export default function AuthProvider({ children }) {
   const loadUser = async () => {
     try {
       const accessToken = getAccessToken();
-
       if (!accessToken) {
         setUser(null);
         return;
       }
 
       const currentUser = await userService.getMe();
-
       setUser(currentUser);
     } catch (error) {
       removeAccessToken();
@@ -51,6 +49,8 @@ export default function AuthProvider({ children }) {
       const currentUser = await userService.getMe();
       setUser(currentUser);
       return currentUser;
+    } catch (error) {
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -64,6 +64,8 @@ export default function AuthProvider({ children }) {
       const currentUser = await userService.getMe();
       setUser(currentUser);
       return currentUser;
+    } catch (error) {
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -72,6 +74,8 @@ export default function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await authService.logout();
+    } catch (error) {
+      console.error("Logout error:", error);
     } finally {
       setUser(null);
     }
@@ -85,7 +89,6 @@ export default function AuthProvider({ children }) {
     login,
     register,
     logout,
-    loadUser,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

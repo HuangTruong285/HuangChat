@@ -29,19 +29,19 @@ api.interceptors.request.use(
 
 // ============================== REFRESH ==============================
 // Quản lý trạng thái Refresh Token
-let isRefreshing = false;
-let failedQueue = [];
+let isRefreshing = false; // Có tiến trình nào xin cấp lại token mới không
+let refreshSubscribers = []; // Hàng đợi mảng lưu các request bị lỗi 401 phát sinh trong lúc token đang được làm mới
 
 // Hàm giải phòng các request đang chờ trong hàng đợi
 const processQueue = (error, token = null) => {
-  failedQueue.forEach((promise) => {
+  refreshSubscribers.forEach((promise) => {
     if (error) {
       promise.reject(error);
     } else {
       promise.resolve(token);
     }
   });
-  failedQueue = [];
+  refreshSubscribers = [];
 };
 
 // ============================== RESPONSE INTERCEPTOR ==============================
@@ -59,14 +59,14 @@ api.interceptors.response.use(
 
     // Nếu chính API refresh token trả về 401 -> Refresh token hết hạn -> Xóa token và reject
     if (originalRequest.url?.includes(API.AUTH.REFRESH)) {
-      removeAccessToken;
+      removeAccessToken();
       return Promise.reject(error);
     }
 
     // Nếu đang có một request khác thực hiện Refresh Token -> Đưa request này vào hàng đợi
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
-        failedQueue.push({
+        refreshSubscribers.push({
           resolve,
           reject,
         });

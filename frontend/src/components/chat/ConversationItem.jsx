@@ -28,7 +28,7 @@ export default function ConversationItem({ conversation, isActive, onClick }) {
           <h4 className="truncate text-sm font-medium">{conversation.title}</h4>
 
           <span className="text-muted-foreground shrink-0 text-[10px]">
-            Hello
+            {conversation.lastMessageAt}
           </span>
         </div>
 

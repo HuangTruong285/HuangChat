@@ -24,13 +24,13 @@ app.use(
     credentials: true,
   }),
 );
-app.use(cookieParser()); // Parse cookie
 // Parse dữ liệu đầu vào (Body Parser)
 app.use(
   express.json({
     limit: "1mb",
   }),
 );
+app.use(cookieParser()); // Parse cookie
 app.use(express.urlencoded({ extended: true }));
 // Log request ở môi trường dev
 if (env.nodeEnv !== "production") app.use(morgan("dev"));

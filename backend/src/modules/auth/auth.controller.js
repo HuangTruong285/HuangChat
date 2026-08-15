@@ -33,13 +33,13 @@ export const login = asyncHandler(async (req, res) => {
 
 // ============================== REFRESH ==============================
 export const refresh = asyncHandler(async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+  const oldRefreshToken = req.cookies.refreshToken;
 
-  if (!refreshToken) {
+  if (!oldRefreshToken) {
     throw ApiError.unauthorized("Refresh token is required");
   }
 
-  const result = await authService.refresh(refreshToken);
+  const result = await authService.refresh(oldRefreshToken);
 
   setRefreshTokenCookie(res, result.refreshToken);
 
@@ -56,9 +56,7 @@ export const refresh = asyncHandler(async (req, res) => {
 export const logout = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
-  if (refreshToken) {
-    await authService.logout(refreshToken);
-  }
+  await authService.logout(refreshToken);
 
   clearRefreshTokenCookie(res);
 

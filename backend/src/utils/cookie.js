@@ -2,6 +2,7 @@ import env from "../config/env.js";
 
 const isProduction = env.nodeEnv === "production";
 
+// Đặt refresh token vào cookie
 export const setRefreshTokenCookie = (res, refreshToken) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
@@ -10,6 +11,8 @@ export const setRefreshTokenCookie = (res, refreshToken) => {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
   });
 };
+
+// Xoá refresh token khỏi cookie
 export const clearRefreshTokenCookie = (res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,

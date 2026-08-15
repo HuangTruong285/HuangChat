@@ -1,9 +1,23 @@
 import { MessageSquare, User, Settings, LogOut } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import useAuth from "../../hook/useAuth";
 
 export default function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+
+      navigate("/auth", {
+        replace: true,
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   const menus = [
     {
@@ -54,6 +68,8 @@ export default function AppSidebar() {
 
       {/* Logout */}
       <button
+        type="button"
+        onClick={handleLogout}
         title="Đăng xuất"
         className="text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive flex h-11 w-11 items-center justify-center rounded-xl transition"
       >

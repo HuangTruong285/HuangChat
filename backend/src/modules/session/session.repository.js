@@ -3,46 +3,46 @@ import Session from "./session.model.js";
 // ============================== CREATE ==============================
 
 // Tạo session mới
-export const create = (data) => {
+export const create = async (data) => {
   return Session.create(data);
 };
 
 // ============================== READ ==============================
 
 // Tìm session theo token hash
-export const findByTokenHash = (tokenHash) => {
+export const findByTokenHash = async (tokenHash) => {
   return Session.findOne({ tokenHash });
 };
 
 // Lấy tất cả session của user
-export const findByUserId = (userId) => {
+export const findByUserId = async (userId) => {
   return Session.find({ userId });
 };
 
 // ============================== UPDATE ==============================
 
 // Thu hồi session theo token hash
-export const revokeByTokenHash = (tokenHash) => {
+export const revokeByTokenHash = async (tokenHash) => {
   return Session.findOneAndUpdate(
-    { tokenHash },
+    { tokenHash, revoked: false },
     { revoked: true },
     { new: true },
   );
 };
 
 // Thu hồi tất cả session của user
-export const revokeAllByUserId = (userId) => {
+export const revokeAllByUserId = async (userId) => {
   return Session.updateMany({ userId, revoked: false }, { revoked: true });
 };
 
 // ============================== DELETE ==============================
 
 // Xóa session theo token hash
-export const deleteByTokenHash = (tokenHash) => {
+export const deleteByTokenHash = async (tokenHash) => {
   return Session.deleteOne({ tokenHash });
 };
 
 // Xóa tất cả session của user
-export const deleteAllByUserId = (userId) => {
+export const deleteAllByUserId = async (userId) => {
   return Session.deleteMany({ userId });
 };
