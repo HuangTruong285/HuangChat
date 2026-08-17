@@ -1,4 +1,17 @@
-// ============================== MAP MESSAGE ==============================
+import { toPublicUser } from "../user/index.js";
+
+// ==============================
+// HELPER
+// ==============================
+const toId = (value) => {
+  if (!value) return null;
+
+  return value._id ? value._id.toString() : value.toString();
+};
+
+// ==============================
+// MAP MESSAGE
+// ==============================
 /*
  * id : Id của tin nhắn
  * conversationId : Id của cuộc hội thoại
@@ -13,33 +26,41 @@ export const toMessage = (message) => {
   if (!message) return null;
 
   return {
-    id: message._id?.toString() ?? message.id?.toString(),
-    conversationId: message.conversationId?._id
-      ? message.conversationId._id?.toString()
-      : message.conversationId?.toString(),
-    senderId: message.senderId?._id
-      ? message.senderId._id?.toString()
-      : message.senderId?.toString(),
+    id: toId(message._id ?? message.id),
+    conversationId: toId(message.conversationId),
+    senderId: toId(message.senderId),
     type: message.type,
     content: message.content ?? "",
-    imgUrl: message.imgUrl ?? "",
+    imgUrl: message.imgUrl ?? null,
+    imgPublicId: message.imgPublicId ?? null,
     createdAt: message.createdAt,
     updatedAt: message.updatedAt,
   };
 };
 
-// ============================== MAP MESSAGE LIST ==============================
+// ==============================
+// MAP MESSAGE LIST
+// ==============================
 export const toMessageList = (messages = []) => {
   return messages.map(toMessage);
 };
 
-export const toMessageSender = (sender) => {
-  if (!sender) return null;
+export const toMessageWithSender = (message) => {
+  if (!message) return null;
 
   return {
-    id: sender._id?.toString() ?? sender.id?.toString(),
-    username: sender.username ?? "",
-    displayName: sender.displayName ?? "",
-    avatarUrl: sender.avatarUrl ?? null,
+    id: toId(message._id),
+    conversationId: toId(message.conversationId),
+    sender: message.senderId?._id ? toPublicUser(message.senderId) : null,
+    type: message.type,
+    content: message.content ?? "",
+    imgUrl: message.imgUrl ?? null,
+    imgPublicId: message.imgPublicId ?? null,
+    createdAt: message.createdAt,
+    updatedAt: message.updatedAt,
   };
+};
+
+export const toMessageWithSenderList = (messages = []) => {
+  return messages.map(toMessageWithSender);
 };

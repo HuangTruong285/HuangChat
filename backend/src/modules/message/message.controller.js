@@ -3,20 +3,24 @@ import * as messageService from "./message.service.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
-// ============================== SEND MESSAGE ==============================
+// ==============================
+// SEND MESSAGE
+// ==============================
 export const sendMessage = asyncHandler(async (req, res) => {
   const message = await messageService.sendMessage({
     conversationId: req.body.conversationId,
     senderId: req.user.id,
     type: req.body.type,
     content: req.body.content,
-    imgUrl: req.body.imgUrl,
+    file: req.file,
   });
 
   return ApiResponse.created(res, "Message sent successfully", message);
 });
 
-// ============================== GET MESSAGE ==============================
+// ==============================
+// GET MESSAGE
+// ==============================
 export const getMessages = asyncHandler(async (req, res) => {
   const { conversationId } = req.params;
 

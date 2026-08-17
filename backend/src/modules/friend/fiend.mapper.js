@@ -1,67 +1,120 @@
-// ============================== MAP FRIEND ==============================
+import { toPublicUser } from "../user/index.js";
+
+// HELPER
+const toId = (value) => {
+  if (!value) return null;
+
+  return value._id ? value._id.toString() : value.toString();
+};
+
+// ==============================
+// MAP FRIEND
+// ==============================
 export const toFriend = (friend) => {
   if (!friend) return null;
 
   return {
-    id: friend._id?.toString(),
-    userA: friend.userA?._id
-      ? friend.userA._id.toString()
-      : friend.userA?.toString(),
-    userB: friend.userB?._id
-      ? friend.userB._id.toString()
-      : friend.userB?.toString(),
+    id: toId(friend._id),
+    userA: toId(friend.userA),
+    userB: toId(friend.userB),
     createdAt: friend.createdAt,
     updatedAt: friend.updatedAt,
   };
 };
 
-// ============================== MAP FRIEND LIST ==============================
-export const toFriendList = (friend = []) => {
+// ==============================
+// MAP FRIEND LIST
+// ==============================
+export const toFriendList = (friends = []) => {
   return friends.map(toFriend);
 };
 
+// ==============================
+// MAP FRIEND + OTHER USER
+// ==============================
 export const toFriendWithUser = (friend, userId) => {
-  if (!friend) return null;
+  if (!friend || !userId) return null;
 
   const currentUserId = userId.toString();
+  const userAId = toId(friend.userA);
 
-  const otherUser =
-    friend.userA?._id?.toString() === currentUserId
-      ? friend.userB
-      : friend.userA;
+  const otherUser = userAId === currentUserId ? friend.userB : friend.userA;
 
   return {
-    id: friend._id.toString(),
-    user: otherUser?._id
-      ? {
-          id: otherUser._id.toString(),
-          username: otherUser.username,
-          displayName: otherUser.displayName,
-          avatarUrl: otherUser.avatarUrl,
-        }
-      : null,
+    id: toId(friend._id),
+    user: otherUser?._id ? toPublicUser(otherUser) : null,
     createdAt: friend.createdAt,
   };
 };
 
-// ============================== MAP FRIEND REQUEST ==============================
+// ==============================
+// MAP FRIEND + OTHER USER LIST
+// ==============================
+export const toFriendWithUserList = (friends = [], userId) => {
+  return friends.map((friend) => toFriendWithUser(friend, userId));
+};
+
+// ==============================
+// MAP FRIEND REQUEST
+// ==============================
 export const toFriendRequest = (friendRequest) => {
   if (!friendRequest) return null;
+
   return {
-    id: friendRequest._id?.toString(),
-    from: friendRequest.from?._id
-      ? friendRequest.from._id.toString()
-      : friendRequest.from?.toString(),
-    to: friendRequest.to?._id
-      ? friendRequest.to._id.toString()
-      : friendRequest.to?.toString(),
+    id: toId(friendRequest._id),
+    from: toId(friendRequest.from),
+    to: toId(friendRequest.to),
     message: friendRequest.message ?? "",
     createdAt: friendRequest.createdAt,
     updatedAt: friendRequest.updatedAt,
   };
 };
 
-// ============================== MAP FRIEND REQUEST LIST ==============================
+// ==============================
+// MAP RECEIVED REQUEST
+// ==============================
+export const toReceivedFriendRequest = (friendRequest) => {
+  if (!friendRequest) return null;
+
+  return {
+    id: toId(friendRequest._id),
+    user: toPublicUser(friendRequest.from),
+    message: friendRequest.message ?? "",
+    createdAt: friendRequest.createdAt,
+  };
+};
+
+// ==============================
+// MAP SENT REQUEST
+// ==============================
+export const toSentFriendRequest = (friendRequest) => {
+  if (!friendRequest) return null;
+
+  return {
+    id: toId(friendRequest._id),
+    user: toPublicUser(friendRequest.to),
+    message: friendRequest.message ?? "",
+    createdAt: friendRequest.createdAt,
+  };
+};
+
+// ==============================
+// MAP FRIEND REQUEST LIST
+// ==============================
 export const toFriendRequestList = (friendRequests = []) => {
   return friendRequests.map(toFriendRequest);
+};
+
+// ==============================
+// MAP RECEIVED LIST
+// ==============================
+export const toReceivedFriendRequestList = (friendRequests = []) => {
+  return friendRequests.map(toReceivedFriendRequest);
+};
+
+// ==============================
+// MAP SENT LIST
+// ==============================
+export const toSentFriendRequestList = (friendRequests = []) => {
+  return friendRequests.map(toSentFriendRequest);
 };

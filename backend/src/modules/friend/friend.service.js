@@ -2,6 +2,7 @@ import ApiError from "../../utils/ApiError.js";
 
 import { userRepository } from "../user/index.js";
 import * as friendRepository from "./friend.repository.js";
+import * as friendMapper from "./fiend.mapper.js";
 import * as friendRequestRepository from "./friendRequest.repository.js";
 
 // ============================== SEND REQUEST ==============================
@@ -39,7 +40,7 @@ export const sendRequest = async ({ from, to, message = "" }) => {
     message,
   });
 
-  return friendRequest;
+  return friendMapper.toFriendRequest(friendRequest);
 };
 
 // ============================== ACCEPT REQUEST ==============================
@@ -70,7 +71,7 @@ export const acceptRequest = async (requestId, userId) => {
   // Xoá lời mời kết bạn
   await friendRequestRepository.deleteById(requestId);
 
-  return friend;
+  return friendMapper.toFriend(friend);
 };
 
 // ============================== REJECT REQUEST ==============================
@@ -121,7 +122,9 @@ export const unfriend = async (userId, friendId) => {
 
 // ============================== GET FRIEND LIST ==============================
 export const getFriends = async (userId) => {
-  return friendRepository.findFriends(userId);
+  const friends = await friendRepository.findFriends(userId);
+
+  return friendMapper.toFriendWithUser(friends, userId);
 };
 
 // ============================== GET RECEIVED REQUEST LIST ==============================

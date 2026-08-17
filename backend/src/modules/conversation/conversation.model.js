@@ -27,11 +27,12 @@ const groupSchema = new mongoose.Schema(
     name: {
       type: String,
       trim: true,
+      maxLength: 100,
     },
     // Đường dẫn ảnh đại diện
     avatarUrl: {
       type: String,
-      default: "",
+      default: null,
     },
     // ID người tạo nhóm
     createdBy: {
@@ -49,7 +50,7 @@ const lastMessageSchema = new mongoose.Schema(
   {
     // ID tin nhắn cuối
     _id: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
     },
     // Nội dung tin nhắn
     content: {
@@ -103,10 +104,10 @@ const conversationSchema = new mongoose.Schema(
     // Thời gian gửi tin nhắn cuối cùng
     lastMessageAt: {
       type: Date,
-      default: Date.now,
+      default: null,
     },
 
-    // Mảng chứ danh sách ID những người đã xem tin nhắn cuối cùng
+    // Mảng chứa danh sách ID những người đã xem tin nhắn cuối cùng
     seenBy: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -118,7 +119,7 @@ const conversationSchema = new mongoose.Schema(
     unreadCounts: {
       type: Map,
       of: Number,
-      default: {},
+      default: () => new Map(),
     },
   },
   {

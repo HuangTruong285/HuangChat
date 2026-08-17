@@ -17,7 +17,9 @@ const friendRequestSchema = new mongoose.Schema(
     // Lời nhắn kèm theo
     message: {
       type: String,
+      trim: true,
       maxLength: 300,
+      default: "",
     },
   },
   {

@@ -3,7 +3,6 @@ import { Router } from "express";
 import * as userController from "./user.controller.js";
 import {
   updateProfileSchema,
-  updateAvatarSchema,
   updateStatusSchema,
   searchUsersSchema,
 } from "./user.validator.js";
@@ -24,12 +23,7 @@ router.patch(
 );
 
 // Cập nhật avatar
-router.patch(
-  "/avatar",
-  upload.single("avatar"),
-  validate(updateAvatarSchema),
-  userController.updateAvatar,
-);
+router.patch("/avatar", upload.single("avatar"), userController.updateAvatar);
 
 // Cập nhật trạng thái online / offline
 router.patch(

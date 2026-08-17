@@ -2,6 +2,8 @@ import connectDB from "./config/db.js";
 import mongoose from "mongoose";
 import env from "./config/env.js";
 import app from "./app.js";
+import http from "http";
+import { initSocket } from "./socket/index.js";
 
 /* ==========================================================================
    1. BẮT LỖI ĐỒNG BỘ CẤP CAO NHẤT (UNCAUGHT EXCEPTIONS)
@@ -21,7 +23,8 @@ process.on("uncaughtException", (err) => {
    2. KHỞI ĐỘNG SERVER (BOOTSTRAP)
    ========================================================================== */
 const PORT = env.port || 5000;
-let server;
+const httpServer = http.createServer(app);
+const io = initSocket(httpServer);
 
 let isShuttingDown = false;
 
@@ -31,11 +34,11 @@ const start = async () => {
     await connectDB();
 
     // Khởi động Express HTTP Server
-    server = app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`🚀 App running on http://localhost:${PORT}`);
     });
 
-    server.on("error", (err) => {
+    httpServer.on("error", (err) => {
       console.error("❌ Server failed to start:", err);
       process.exit(1);
     });
@@ -68,19 +71,25 @@ const shutdown = async (signal) => {
   forceTimeout.unref(); // Không giữ Event Loop chạy nếu tiến trình đã dọn dẹp xong
 
   try {
-    // 1. Ngừng nhận request mới và đợi các request dở dang hoàn thành
-    if (server) {
-      await new Promise((resolve) => server.close(resolve));
+    // 1. Đóng kết nối Socket.io
+    if (io) {
+      await io.close();
+      console.log("⚡ Socket.IO connections closed.");
+    }
+
+    // 2. Ngừng nhận request mới và đợi các request dở dang hoàn thành
+    if (httpServer) {
+      await new Promise((resolve) => httpServer.close(resolve));
       console.log("🛑 HTTP server closed.");
     }
 
-    // 2. Đóng kết nối MongoDB
+    // 3. Đóng kết nối MongoDB
     if (mongoose.connection.readyState !== 0) {
       await mongoose.connection.close();
     }
     console.log("📦 MongoDB connection closed.");
 
-    // 3. Dọn dẹp bộ đếm thời gian và thoát thành công (code 0)
+    // 4. Dọn dẹp bộ đếm thời gian và thoát thành công (code 0)
     clearTimeout(forceTimeout);
     process.exit(0);
   } catch (err) {
@@ -104,11 +113,14 @@ process.on("unhandledRejection", (err) => {
   console.error(err);
 
   // Đóng HTTP server trước rồi mới dừng app để đảm bảo tính toàn vẹn
-  if (server) {
-    server.close(() => {
+  if (httpServer) {
+    httpServer.close(() => {
       process.exit(1);
     });
   } else {
     process.exit(1);
   }
 });
+
+// (Tuỳ chọn) Export biến `io` hoặc `httpServer` nếu cần dùng ở các file controller khác
+export { httpServer, io };

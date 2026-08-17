@@ -1,8 +1,11 @@
+import fs from "fs/promises";
+
 import * as messageRepository from "./message.repository.js";
 import * as messageMapper from "./message.mapper.js";
 import { conversationRepository } from "../conversation/index.js";
 
 import ApiError from "../../utils/ApiError.js";
+import { uploadImage, deleteImage } from "../../utils/cloudinary.js";
 
 // ============================== SEND MESSAGE ==============================
 export const sendMessage = async ({
@@ -10,7 +13,7 @@ export const sendMessage = async ({
   senderId,
   type = "text",
   content = "",
-  imgUrl = "",
+  file = null,
 }) => {
   // Kiểm tra xem cuộc trò chuyện có tồn tại không
   const conversation = await conversationRepository.findById(conversationId);
@@ -26,22 +29,51 @@ export const sendMessage = async ({
     throw ApiError.forbidden("You are not a participant");
   }
 
+  // image
+  let imgUrl = null;
+  let imgPublicId = null;
+
+  if (type === "image") {
+    if (!file) {
+      throw ApiError.badRequest("Image file is required");
+    }
+
+    try {
+      const result = await uploadImage(file.path, {
+        folder: "chatapp/messages",
+      });
+
+      imgUrl = result.secure_url;
+      imgPublicId = result.public_id;
+    } finally {
+      // Xoá file tạm trong uploads/
+      await fs.unlink(file.path).catch(() => {});
+    }
+  }
+
   // Tạo tin nhắn và lưu vào DB
   const message = await messageRepository.create({
     conversationId,
     senderId,
     type,
-    content,
+    content: type === "image" ? "" : content,
     imgUrl,
+    imgPublicId,
   });
 
+  const lastMessageContent = type === "image" ? "Hình ảnh" : content;
+
   // Cập nhật tin nhắn mới nhất (last Message)
-  await conversationRepository.updateLastMessage(conversationId, {
-    _id: message._id,
-    content: message.content,
-    senderId: message.senderId,
-    createdAt: message.createdAt,
-  });
+  await conversationRepository.updateLastMessage(
+    conversationId,
+    {
+      _id: message._id,
+      content: lastMessageContent,
+      senderId: message.senderId,
+      createdAt: message.createdAt,
+    },
+    message.createdAt,
+  );
 
   // Tăng số lượng tin nhắn của người nhận lên 1
   const unreadCounts = {};
@@ -90,6 +122,11 @@ export const deleteMessage = async (messageId) => {
   const message = await messageRepository.findById(messageId);
   if (!message) {
     throw new ApiError(404, "Message not found");
+  }
+
+  // Nếu là message ảnh thì xoá ảnh trên Cloudinary
+  if (message.type === "image" && message.imgPublicId) {
+    await deleteImage(message.imgPublicId);
   }
 
   // Xoá tin nhắn

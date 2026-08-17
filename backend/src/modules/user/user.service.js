@@ -7,37 +7,44 @@ import * as userMapper from "./user.mapper.js";
 // ============================== GET PROFILE ==============================
 
 export const getCurrentUser = async (userId) => {
+  // Kiểm tra xem người dùng có tồn tại
   const user = await userRepository.findById(userId);
   if (!user) {
     throw ApiError.notFound("User not found");
   }
+
   return userMapper.toCurrentUser(user);
 };
 
 // ============================== UPDATE PROFILE ==============================
 
 export const updateProfile = async (userId, data) => {
+  // Cập nhật thông tin tên hiển thị và trả về thông tin người dùng
   const user = await userRepository.updateProfile(userId, {
     displayName: data.displayName,
   });
   if (!user) {
     throw ApiError.notFound("User not found");
   }
+
   return userMapper.toCurrentUser(user);
 };
 
 // ============================== UPDATE AVATAR ==============================
 
 export const updateAvatar = async (userId, file) => {
+  // Kiểm tra file có tồn tại không
   if (!file) {
-    throw Api.Error.badRequest("Avatar is required");
+    throw ApiError.badRequest("Avatar is required");
   }
 
+  // Kiểm tra người dùng có tồn tại không
   const user = await userRepository.findById(userId);
   if (!user) {
     throw ApiError.notFound("User not found");
   }
 
+  // upload hình ảnh lên cloudinary
   const result = await cloudinary.uploadImage(file.path, {
     folder: "chatapp/avatars",
   });
@@ -50,7 +57,7 @@ export const updateAvatar = async (userId, file) => {
   });
 
   if (oldAvatarId) {
-    await cloudinaryService.deleteImage(user.avatarId);
+    await cloudinary.deleteImage(oldAvatarId);
   }
 
   return userMapper.toCurrentUser(updatedUser);
@@ -63,7 +70,7 @@ export const updateStatus = async (userId, status) => {
   if (!user) {
     throw ApiError.notFound("User not found");
   }
-  return userMapper.toCurrentUser(user);
+  return userMapper.toUserStatus(user);
 };
 
 // ============================== SEARCH ==============================

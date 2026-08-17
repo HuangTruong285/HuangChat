@@ -1,4 +1,27 @@
-// Trả về một thành viên
+import { toPublicUser } from "../user/index.js";
+
+// ==============================
+// HELPER
+// ==============================
+const toId = (value) => {
+  if (!value) return null;
+
+  return value._id ? value._id.toString() : value.toString();
+};
+
+const getUnreadCount = (conversation, userId) => {
+  if (!conversation || !userId) return 0;
+
+  const id = userId.toString();
+
+  return (
+    conversation.unreadCounts?.get?.(id) ?? conversation.unreadCounts?.[id] ?? 0
+  );
+};
+
+// ==============================
+// PARTICIPANT
+// ==============================
 /*
  * userId : Id của thành viên
  * displayName : Tên hiện thị của thành viên
@@ -8,22 +31,23 @@
 export const toParticipant = (participant) => {
   if (!participant) return null;
 
+  const user = participant.userId;
+
   return {
-    userId: participant.userId?._id
-      ? participant.userId._id.toString()
-      : participant.userId?.toString(),
-    displayName: participant.userId?.displayName ?? null,
-    avatarUrl: participant.userId?.avatarUrl ?? null,
+    user: user?._id ? toPublicUser(user) : null,
+    userId: toId(user),
     joinedAt: participant.joinedAt ?? null,
   };
 };
 
 // Trả về danh sách thành viên
-export const toParticipants = (participant = []) => {
+export const toParticipants = (participants = []) => {
   return participants.map(toParticipant);
 };
 
-// Trả về một nhóm
+// ==============================
+// GROUP
+// ==============================
 /*
  * name : Tên nhóm
  * avatarUrl : Link avatar nhóm
@@ -34,14 +58,14 @@ export const toGroup = (group) => {
 
   return {
     name: group.name ?? "",
-    avatarUrl: group.avatarUrl ?? "",
-    createdBy: group.createdBy?._id
-      ? group.createdBy._id.toString()
-      : (group.createdBy?.toString() ?? null),
+    avatarUrl: group.avatarUrl ?? null,
+    createdBy: toId(group.createdBy),
   };
 };
 
-// Trả về tin nhắn gần nhất
+// ==============================
+// LAST MESSAGE
+// ==============================
 /*
  * id : Id tin nhắn gần nhất
  * content : Nội dung tin nhắn gần nhất
@@ -50,18 +74,18 @@ export const toGroup = (group) => {
  */
 export const toLastMessage = (lastMessage) => {
   if (!lastMessage) return null;
+
   return {
-    id: lastMessage._id?.toString() ?? null,
+    id: toId(lastMessage._id),
     content: lastMessage.content ?? "",
-    senderId: lastMessage.senderId?._id
-      ? lastMessage.senderId._id.toString()
-      : (lastMessage.senderId?.toString() ?? null),
+    senderId: toId(lastMessage.senderId),
     createdAt: lastMessage.createdAt ?? null,
   };
 };
 
-// ============================== CONVERSATION MAPPER ==============================
-// Trả về conversation tổng quát
+// ==============================
+// CONVERSATION
+// ==============================
 /*
  * id : Id cuộc hội thoại
  * type : Loại cuộc hội thoại
@@ -78,16 +102,13 @@ export const toConversation = (conversation) => {
   if (!conversation) return null;
 
   return {
-    id: conversation._id?.toString(),
+    id: toId(conversation._id),
     type: conversation.type,
     participants: toParticipants(conversation.participants),
     group: toGroup(conversation.group),
     lastMessage: toLastMessage(conversation.lastMessage),
     lastMessageAt: conversation.lastMessageAt ?? null,
-    seenBy:
-      conversation.seenBy?.map((userId) =>
-        userId?._id ? userId._id.toString() : userId.toString(),
-      ) ?? [],
+    seenBy: conversation.seenBy?.map(toId) ?? [],
     unreadCounts:
       conversation.unreadCounts instanceof Map
         ? Object.fromEntries(conversation.unreadCounts)
@@ -102,7 +123,9 @@ export const toConversationList = (conversations = []) => {
   return conversations.map(toConversation);
 };
 
-// ============================== CONVERSATION LIST ITEM ==============================
+// ==============================
+// CONVERSATION LIST ITEM
+// ==============================
 /*
  * id : Id cuộc hội thoại
  * type : Loại cuộc hội thoại (direct/group)
@@ -113,48 +136,44 @@ export const toConversationList = (conversations = []) => {
  * unreadCount : Số tin nhắn chưa đọc của bản thân
  */
 export const toConversationListItem = (conversation, currentUserId) => {
-  if (!conversation) return null;
+  if (!conversation || !currentUserId) return null;
 
-  const currentUserIdString = currentUserId?.toString();
-  const unreadCount =
-    conversation.unreadCounts?.get?.(currentUserIdString) ??
-    conversation.unreadCounts?.[currentUserIdString] ??
-    0;
+  const currentId = currentUserId?.toString();
 
   let title = "";
-  let avatarUrl = "";
+  let avatarUrl = null;
+
   if (conversation.type === "group") {
     title = conversation.group?.name ?? "Unnamed group";
-    avatarUrl = conversation.group?.avatarUrl ?? "";
+    avatarUrl = conversation.group?.avatarUrl ?? null;
   }
+
   if (conversation.type == "direct") {
     const otherParticipant = conversation.participants?.find((participant) => {
-      const userId = participant.userId?._id
-        ? participant.userId._id.toString()
-        : participant.userId.toString();
-
-      return userId !== currentUserIdString;
+      toId(participant.userId) !== currentId;
     });
 
     const user = otherParticipant?.userId;
 
     title = user?.displayName ?? user?.username ?? "Unknown user";
 
-    avatarUrl = user?.avatarUrl ?? "";
+    avatarUrl = user?.avatarUrl ?? null;
   }
 
   return {
-    id: conversation._id?.toString(),
+    id: toId(conversation._id),
     type: conversation.type,
     title,
     avatarUrl,
     lastMessage: toLastMessage(conversation.lastMessage),
     lastMessageAt: conversation.lastMessageAt ?? null,
-    unreadCount,
+    unreadCount: getUnreadCount(conversation, currentUserId),
   };
 };
 
-// ============================== CONVERSATION DETAIL ==============================
+// ==============================
+// CONVERSATION DETAIL
+// ==============================
 /*
  * id : Id cuộc hội thoại
  * type : Loại cuộc hội thoại
@@ -171,112 +190,92 @@ export const toConversationListItem = (conversation, currentUserId) => {
  * memberCount : Số lượng thành viên
  */
 export const toConversationDetail = (conversation, currentUserId) => {
-  if (!conversation) return null;
-
-  const base = toConversation(conversation);
-
-  const currentUserIdString = currentUserId.toString();
-  const unreadCount =
-    conversation.unreadCounts?.get?.(currentUserIdString) ??
-    conversation.unreadCounts?.[currentUserIdString] ??
-    0;
+  if (!conversation || !currentUserId) return null;
 
   return {
-    ...base,
-    unreadCount,
+    ...toConversation(conversation),
+    unreadCount: getUnreadCount(conversation, currentUserId),
     isGroup: conversation.type === "group",
     memberCount: conversation.participants?.length ?? 0,
   };
 };
 
-// Trả về cuộc hội thoại trực tiếp (direct)
+// ==============================
+// DIRECT CONVERSATION
+// ==============================
 export const toDirectConversation = (conversation, currentUserId) => {
-  if (!conversation || conversation.type !== "direct") {
+  if (!conversation || conversation.type !== "direct" || !currentUserId) {
     return null;
   }
 
-  const currentUserIdString = currentUserId.toString();
+  const currentId = currentUserId.toString();
 
-  const otherParticipant = conversation.participants?.find((participant) => {
-    const userId = participant.userId?._id
-      ? participant.userId._id.toString()
-      : participant.userId.toString();
-
-    return userId !== currentUserIdString;
-  });
+  const otherParticipant = conversation.participants?.find(
+    (participant) => toId(participant.userId) !== currentId,
+  );
 
   const user = otherParticipant?.userId;
 
-  if (!user) return null;
+  if (!user?._id) return null;
 
+  return {
+    id: toId(conversation._id),
+    type: "direct",
+    user: toPublic(user),
+    lastMessage: toLastMessage(conversation.lastMessage),
+    lastMessageAt: conversation.lastMessageAt ?? null,
+    unreadCount: getUnreadCount(conversation, currentUserId),
+  };
+};
+
+// ==============================
+// GROUP CONVERSATION
+// ==============================
+export const toGroupConversation = (conversation, currentUserId) => {
+  if (!conversation || conversation.type !== "group" || !currentUserId) {
+    return null;
+  }
+
+  const currentUseridString = currentUserId.toString();
   const unreadCount =
     conversation.unreadCounts?.get?.(currentUserIdString) ??
     conversation.unreadCounts?.[currentUserIdString] ??
     0;
 
   return {
-    id: conversation._id.toString(),
-    type: "direct",
-    user: {
-      id: user._id.toString(),
-      username: user.username,
-      displayName: user.displayName,
-      avatarUrl: user.avatarUrl ?? "",
-      status: user.status ?? "offline",
-    },
-
-    lastMessage: toLastMessage(conversation.lastMessage),
-    lastMessageAt: conversation.lastMessageAt ?? null,
-    unreadCount,
-  };
-};
-
-// Trả về cuộc hội thoại dành cho nhóm (group)
-export const toGroupConversation = (conversation, currentUserId) => {
-  if (!conversation || conversation.type !== "group") {
-    return null;
-  }
-
-  const currentUseridString = currentUserId.toString();
-  const unreadCount =
-    conversation.unreadCounts.get?.(currentUserIdString) ??
-    conversation.unreadCounts?.[currentUserIdString] ??
-    0;
-
-  return {
-    id: conversation._id.toString(),
+    id: toId(conversation._id),
     type: "group",
     group: toGroup(conversation.group),
-    participants: conversation.participants.map(toParticipant) ?? [],
+    participants: toParticipants(conversation.participants),
     memberCount: conversation.participants?.length ?? 0,
     lastMessage: toLastMessage(conversation.lastMessage),
     lastMessageAt: conversation.lastMessageAt ?? null,
-    unreadCount,
+    unreadCount: getUnreadCount(conversation, currentUserId),
   };
 };
 
-// Trả về thông tin 1 thành viên trong cuộc hội thoại
+// ==============================
+// CONVERSATION MEMBER
+// ==============================
 export const toConversationMember = (participant) => {
   if (!participant) return null;
 
   const user = participant.userId;
 
   return {
-    id: user?._id ? user._id.toString() : participant.userId.toString(),
-    username: user?.username ?? null,
-    displayName: user?.displayName ?? null,
-    avatarUrl: user?.avatarURL ?? "",
-    status: user?.status ?? "offline",
+    user: user?._id ? toPublicUser(user) : null,
     joinedAt: participant.joinedAt ?? null,
   };
 };
 
-// Trả về conversation phù hợp cho search và notification
+// ==============================
+// CONVERSATION PREVIEW
+// ==============================
 export const toConversationPreview = (conversation) => {
   if (!conversation) return null;
 
   return {
-    id: conversation._id.toString(),
+    id: toId(conversation._id),
     type: conversation.type,
     lastMessage: toLastMessage(conversation.lastMessage),
     lastMessageAt: conversation.lastMessageAt ?? null,

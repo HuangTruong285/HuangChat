@@ -1,4 +1,5 @@
 import avatar from "../../../assets/image/Avatar.jpg";
+import { formatConversationTime } from "../../../utils/date";
 
 export default function ConversationItem({ conversation, isActive, onClick }) {
   return (
@@ -28,7 +29,7 @@ export default function ConversationItem({ conversation, isActive, onClick }) {
           <h4 className="truncate text-sm font-medium">{conversation.title}</h4>
 
           <span className="text-muted-foreground shrink-0 text-[10px]">
-            {conversation.lastMessageAt}
+            {formatConversationTime(conversation.lastMessageAt)}
           </span>
         </div>
 

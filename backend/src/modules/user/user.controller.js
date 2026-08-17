@@ -36,7 +36,7 @@ export const updateStatus = asyncHandler(async (req, res) => {
 
 // ============================== SEARCH ==============================
 export const searchUsers = asyncHandler(async (req, res) => {
-  const { keyword = "" } = req.query;
+  const { keyword } = req.query;
 
   const users = await userService.searchUsers(keyword);
 

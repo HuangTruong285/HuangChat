@@ -8,6 +8,7 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Conversation",
       required: true,
+      index: true,
     },
     // ID của người gửi tin nhắn
     senderId: {
@@ -20,17 +21,24 @@ const messageSchema = new mongoose.Schema(
       type: String,
       enum: ["text", "image"],
       default: "text",
+      required: true,
     },
     // Nội dung văn bản của tin nhắn
     content: {
       type: String,
       trim: true,
       default: "",
+      maxLength: 5000,
     },
     // Đường dẫn (URL) của hình ảnh nếu tin nhắn thuộc loại Image
     imgUrl: {
       type: String,
-      default: "",
+      default: null,
+    },
+
+    imgPublicId: {
+      type: String,
+      default: null,
     },
   },
   {

@@ -2,13 +2,13 @@ import mongoose from "mongoose";
 
 const friendSchema = new mongoose.Schema(
   {
-    // ID Người A
+    // User ID nhỏ hơn
     userA: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    // ID Người B
+    // User ID lớn hơn
     userB: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
