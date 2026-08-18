@@ -6,7 +6,7 @@ import * as friendMapper from "./fiend.mapper.js";
 import * as friendRequestRepository from "./friendRequest.repository.js";
 
 // ============================== SEND REQUEST ==============================
-export const sendRequest = async ({ from, to, message = "" }) => {
+export const sendRequest = async (from, to, message = "") => {
   // Tránh gửi cho chính mình
   if (from === to) {
     throw ApiError.badRequest("You cannot send a friend request to yourself.");
@@ -124,15 +124,19 @@ export const unfriend = async (userId, friendId) => {
 export const getFriends = async (userId) => {
   const friends = await friendRepository.findFriends(userId);
 
-  return friendMapper.toFriendWithUser(friends, userId);
+  return friendMapper.toFriendWithUserList(friends, userId);
 };
 
 // ============================== GET RECEIVED REQUEST LIST ==============================
 export const getReceivedRequests = async (userId) => {
-  return friendRequestRepository.findReceivedRequests(userId);
+  const receivedRequests = friendRequestRepository.findReceivedRequests(userId);
+
+  return friendMapper.toReceivedFriendRequestList(receivedRequests);
 };
 
 // ============================== GET SENT REQUEST LIST ==============================
 export const getSentRequests = async (userId) => {
-  return friendRequestRepository.findSentRequests(userId);
+  const sentRequests = friendRequestRepository.findSentRequests(userId);
+
+  return friendMapper.toSentFriendRequestList(sentRequests);
 };

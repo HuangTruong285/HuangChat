@@ -1,3 +1,5 @@
+import fs from "fs/promises";
+
 import ApiError from "../../utils/ApiError.js";
 import * as cloudinary from "../../utils/cloudinary.js";
 
@@ -33,34 +35,46 @@ export const updateProfile = async (userId, data) => {
 // ============================== UPDATE AVATAR ==============================
 
 export const updateAvatar = async (userId, file) => {
-  // Kiểm tra file có tồn tại không
   if (!file) {
     throw ApiError.badRequest("Avatar is required");
   }
 
-  // Kiểm tra người dùng có tồn tại không
   const user = await userRepository.findById(userId);
+
   if (!user) {
     throw ApiError.notFound("User not found");
   }
 
-  // upload hình ảnh lên cloudinary
-  const result = await cloudinary.uploadImage(file.path, {
-    folder: "chatapp/avatars",
-  });
+  let result;
 
-  const oldAvatarId = user.avatarId;
+  try {
+    // Upload lên Cloudinary
+    result = await cloudinary.uploadImage(file.path, {
+      folder: "chatapp/avatars",
+    });
 
-  const updatedUser = await userRepository.updateProfile(userId, {
-    avatarUrl: result.secure_url,
-    avatarId: result.public_id,
-  });
+    const oldAvatarId = user.avatarId;
 
-  if (oldAvatarId) {
-    await cloudinary.deleteImage(oldAvatarId);
+    // Update database
+    const updatedUser = await userRepository.updateProfile(userId, {
+      avatarUrl: result.secure_url,
+      avatarId: result.public_id,
+    });
+
+    // Xóa avatar cũ trên Cloudinary
+    if (oldAvatarId) {
+      await cloudinary.deleteImage(oldAvatarId);
+    }
+
+    return userMapper.toCurrentUser(updatedUser);
+  } finally {
+    // Luôn xóa file tạm trên server
+    try {
+      await fs.unlink(file.path);
+    } catch (error) {
+      console.error("Failed to delete temporary file:", error);
+    }
   }
-
-  return userMapper.toCurrentUser(updatedUser);
 };
 
 // ============================== UPDATE STATUS ==============================

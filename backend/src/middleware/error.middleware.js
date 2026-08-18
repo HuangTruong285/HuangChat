@@ -1,21 +1,41 @@
+import mongoose from "mongoose";
+import multer from "multer";
 import env from "../config/env.js";
 import ApiError from "../utils/ApiError.js";
 
-// ============================== LỖI ROUTE KHÔNG KHỚP ==============================
+// ==============================
+// LỖI ROUTE KHÔNG KHỚP
+// ==============================
 // Xử lý các route không tồn tại
 export const notFound = (req, res, next) => {
   next(ApiError.notFound(`Route not found: ${req.method} ${req.originalUrl}`));
 };
 
-// ============================== XỬ LÝ LỖI TẬP TRUNG ==============================
-
+// ==============================
+// XỬ LÝ LỖI TẬP TRUNG
+// ==============================
 // Middleware xử lý lỗi tập trung
 export const errorHandler = (err, req, res, next) => {
   let customError = err;
 
-  // Mongoose CastError (ObjectId không hợp lệ)
-  if (err.name === "CastError") {
+  // Api Error
+  if (err instanceof ApiError) {
+    customError = err;
+  }
+
+  // Mongoose Cast Error (ObjectId không hợp lệ)
+  else if (err instanceof mongoose.Error.CastError) {
     customError = ApiError.badRequest(`Invalid ${err.path}: ${err.value}`);
+  }
+
+  // Mongoose Validation Error
+  else if (err instanceof mongoose.Error.ValidationError) {
+    const errors = Object.values(err.errors).map((error) => ({
+      field: error.path,
+      message: error.message,
+    }));
+
+    customError = ApiError.unprocessableEntity("Validation failed", errors);
   }
 
   // MongoDB Duplicate Key Error
@@ -26,27 +46,44 @@ export const errorHandler = (err, req, res, next) => {
     customError = ApiError.conflict(`${fieldNames} already exists`);
   }
 
-  // Mongoose Validation Error
-  else if (err.name === "ValidationError") {
-    const errors = Object.values(err.errors ?? {}).map((error) => ({
-      field: error.path,
-      message: error.message,
-    }));
-
-    customError = ApiError.unprocessableEntity("Validation failed", errors);
+  // JWT Error
+  else if (err.name === "TokenExpiredError") {
+    customError = ApiError.unauthorized("Token expired");
+  } else if (err.name === "JsonWebTokenError") {
+    customError = ApiError.unauthorized("Invalid token");
   }
 
-  // JWT Error
-  else if (
-    err.name === "JsonWebTokenError" ||
-    err.name === "TokenExpiredError"
-  ) {
-    customError = ApiError.unauthorized(
-      "Invalid or expired token. Please log in again.",
-    );
+  // Multer
+  else if (err instanceof multer.MulterError) {
+    switch (err.code) {
+      case "LIMIT_FILE_SIZE":
+        customError = ApiError.badRequest("File size is too large");
+        break;
+
+      case "LIMIT_FILE_COUNT":
+        customError = ApiError.badRequest("Too many files");
+        break;
+
+      case "LIMIT_UNEXPECTED_FILE":
+        customError = ApiError.badRequest("Unexpected file field");
+        break;
+
+      case "LIMIT_FIELD_COUNT":
+        customError = ApiError.badRequest("Too many fields");
+        break;
+
+      default:
+        customError = ApiError.badRequest("File upload failed");
+    }
+  }
+
+  // JSON Parse Error
+  else if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    customError = ApiError.badRequest("Invalid JSON body");
   }
 
   // Những lỗi không phải ApiError
+  // Unknown error
   if (!(customError instanceof ApiError)) {
     console.error("🔥 Unexpected Error:", err);
     customError = ApiError.internal();
@@ -57,6 +94,7 @@ export const errorHandler = (err, req, res, next) => {
     console.error("🔥 Critical Error:", err);
   }
 
+  // Response
   const response = {
     success: false,
     statusCode: customError.statusCode,
@@ -65,10 +103,12 @@ export const errorHandler = (err, req, res, next) => {
     timestamp: new Date().toISOString(),
   };
 
+  // Validation errors
   if (customError.errors?.length) {
     response.errors = customError.errors;
   }
 
+  // Development only
   if (!env.isProd) {
     response.stack = customError.stack;
   }
