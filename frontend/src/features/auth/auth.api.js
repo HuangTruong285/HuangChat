@@ -3,6 +3,9 @@ import { API } from "../../constants/api";
 
 export const register = async (body) => {
   const response = await api.post(API.AUTH.REGISTER, body);
+
+  console.log("LOGIN RESPONSE:", response.data);
+
   return response.data;
 };
 

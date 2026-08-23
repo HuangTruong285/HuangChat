@@ -8,6 +8,24 @@ export const API = {
 
   USER: {
     ME: "/v1/api/users/me",
+    UPDATE_PROFILE: "/v1/api/users/me",
+    UPDATE_AVATAR: "/v1/api/users/avatar",
+    UPDATE_STATUS: "/v1/api/users/status",
+    SEARCH: "/v1/api/users/search",
+    DELETE_ME: "/v1/api/users/me",
+  },
+
+  FRIEND: {
+    LIST: "/v1/api/friends",
+    SEND_REQUEST: "/v1/api/friends/requests",
+    ACCEPT_REQUEST: (requestId) =>
+      `/v1/api/friends/requests/${requestId}/accept`,
+    REJECT_REQUEST: (requestId) =>
+      `/v1/api/friends/requests/${requestId}/reject`,
+    CANCEL_REQUEST: (requestId) => `/v1/api/friends/requests/${requestId}`,
+    UNFRIEND: (friendId) => `/v1/api/friends/${friendId}`,
+    RECEIVED_REQUESTS: "/v1/api/friends/requests/received",
+    SENT_REQUESTS: "/v1/api/friends/requests/sent",
   },
 
   CONVERSATION: {

@@ -1,93 +1,291 @@
-import { Search, MessageCircle, UserPlus } from "lucide-react";
-import AppLayout from "../components/layout/AppLayout";
+import { useEffect, useState } from "react";
 
-const friends = [
-  {
-    id: "1",
-    displayName: "Nguyễn Văn A",
-    username: "nguyenvana",
-    avatar: "https://i.pravatar.cc/100?img=1",
-    status: "online",
-  },
-  {
-    id: "2",
-    displayName: "Trần Văn B",
-    username: "tranvanb",
-    avatar: "https://i.pravatar.cc/100?img=2",
-    status: "offline",
-  },
-  {
-    id: "3",
-    displayName: "Lê Văn C",
-    username: "levanc",
-    avatar: "https://i.pravatar.cc/100?img=3",
-    status: "online",
-  },
-];
+import * as friendService from "../features/friend/friend.service";
+import * as userService from "../features/user/user.service";
 
-export default function FriendsPage() {
+import FriendHeader from "../features/friend/components/FriendHeader";
+import FriendTabs from "../features/friend/components/FriendTabs";
+import FriendSearch from "../features/friend/components/FriendSearch";
+import FriendSearchResult from "../features/friend/components/FriendSearchResult";
+import FriendList from "../features/friend/components/FriendList";
+import FriendRequestList from "@/features/friend/components/FriendRequestList";
+import FriendSentRequestList from "@/features/friend/components/SentRequestList";
+
+const FriendPage = () => {
+  // ==============================
+  // DATA
+  // ==============================
+  const [friends, setFriends] = useState([]);
+  const [receivedRequests, setReceivedRequests] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
+
+  // ==============================
+  // TAB
+  // ==============================
+  const [activeTab, setActiveTab] = useState("friends");
+
+  // ==============================
+  // SEARCH
+  // ==============================
+  const [search, setSearch] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  // ==============================
+  // LOADING
+  // ==============================
+  const [friendsLoading, setFriendsLoading] = useState(false);
+  const [receivedLoading, setReceivedLoading] = useState(false);
+  const [sentLoading, setSentLoading] = useState(false);
+
+  // ==============================
+  // LOAD FRIENDS
+  // ==============================
+  const loadFriends = async () => {
+    try {
+      setFriendsLoading(true);
+
+      const data = await friendService.getFriends();
+
+      setFriends(data);
+    } catch (error) {
+      console.error("Load friends error:", error);
+    } finally {
+      setFriendsLoading(false);
+    }
+  };
+
+  // ==============================
+  // LOAD RECEIVED REQUESTS
+  // ==============================
+  const loadReceivedRequests = async () => {
+    try {
+      setReceivedLoading(true);
+
+      const data = await friendService.getReceivedRequests();
+
+      setReceivedRequests(data);
+    } catch (error) {
+      console.error("Load received requests error:", error);
+    } finally {
+      setReceivedLoading(false);
+    }
+  };
+
+  // ==============================
+  // LOAD SENT REQUESTS
+  // ==============================
+  const loadSentRequests = async () => {
+    try {
+      setSentLoading(true);
+
+      const data = await friendService.getSentRequests();
+
+      setSentRequests(data);
+    } catch (error) {
+      console.error("Load sent requests error:", error);
+    } finally {
+      setSentLoading(false);
+    }
+  };
+
+  // ==============================
+  // INITIAL LOAD
+  // ==============================
+  useEffect(() => {
+    loadFriends();
+    loadReceivedRequests();
+    loadSentRequests();
+  }, []);
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      loadFriends(),
+      loadReceivedRequests(),
+      loadSentRequests(),
+    ]);
+  };
+  // ==============================
+  // SEARCH USERS
+  // ==============================
+  useEffect(() => {
+    const keyword = search.trim();
+
+    // Không có keyword
+    if (!keyword) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setSearchLoading(true);
+
+        const data = await userService.searchUsers({
+          keyword,
+        });
+
+        setSearchResults(data);
+      } catch (error) {
+        console.error("Search users error:", error);
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // ==============================
+  // SEND FRIEND REQUEST
+  // ==============================
+  const handleSendRequest = async (userId) => {
+    try {
+      await friendService.sendFriendRequest({
+        to: userId,
+      });
+
+      // Reload sent requests
+      await loadSentRequests();
+    } catch (error) {
+      console.error("Send friend request error:", error);
+    }
+  };
+
+  // ==============================
+  // ACCEPT FRIEND REQUEST
+  // ==============================
+  const handleAccept = async (requestId) => {
+    try {
+      await friendService.acceptFriendRequest(requestId);
+
+      // Xóa request khỏi danh sách received
+      setReceivedRequests((prev) =>
+        prev.filter((item) => item.id !== requestId),
+      );
+
+      // Reload friends
+      await loadFriends();
+    } catch (error) {
+      console.error("Accept friend request error:", error);
+    }
+  };
+
+  // ==============================
+  // REJECT FRIEND REQUEST
+  // ==============================
+  const handleReject = async (requestId) => {
+    try {
+      await friendService.rejectFriendRequest(requestId);
+
+      // Xóa request khỏi danh sách received
+      setReceivedRequests((prev) =>
+        prev.filter((item) => item.id !== requestId),
+      );
+    } catch (error) {
+      console.error("Reject friend request error:", error);
+    }
+  };
+
+  // ==============================
+  // CANCEL SENT REQUEST
+  // ==============================
+  const handleCancel = async (requestId) => {
+    try {
+      await friendService.cancelFriendRequest(requestId);
+
+      // Xóa request khỏi danh sách sent
+      setSentRequests((prev) => prev.filter((item) => item.id !== requestId));
+    } catch (error) {
+      console.error("Cancel friend request error:", error);
+    }
+  };
+
+  // ==============================
+  // UNFRIEND
+  // ==============================
+  const handleUnfriend = async (friendId) => {
+    try {
+      await friendService.unfriend(friendId);
+
+      // Xóa friend khỏi UI
+      setFriends((prev) => prev.filter((item) => item.id !== friendId));
+    } catch (error) {
+      console.error("Unfriend error:", error);
+    }
+  };
+
   return (
-    <div className="bg-background text-foreground h-full overflow-y-auto p-6">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Bạn bè</h1>
+    <div className="h-screen p-4">
+      {/* ============================== */}
+      {/* HEADER */}
+      {/* ============================== */}
 
-          <p className="text-muted-foreground mt-1 text-sm">
-            Quản lý bạn bè và tìm kiếm người dùng
-          </p>
-        </div>
+      <FriendHeader onRefresh={handleRefresh} />
 
-        <div className="relative mb-6">
-          <Search
-            size={20}
-            className="text-muted-foreground absolute top-3 left-4"
-          />
+      {/* ============================== */}
+      {/* TABS */}
+      {/* ============================== */}
 
-          <input
-            type="text"
-            placeholder="Tìm kiếm người dùng..."
-            className="border-input bg-card text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-xl border py-3 pr-4 pl-11 text-sm shadow-sm outline-none focus:ring-2"
-          />
-        </div>
+      <FriendTabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        friendCount={friends.length}
+        requestCount={receivedRequests.length}
+        sentCount={sentRequests.length}
+      />
 
-        <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Bạn bè</h2>
+      {/* ============================== */}
+      {/* FRIENDS */}
+      {/* ============================== */}
 
-            <span className="text-muted-foreground text-sm">3 người</span>
-          </div>
+      {activeTab === "friends" && (
+        <>
+          <FriendSearch value={search} onChange={setSearch} />
 
-          <div className="space-y-2">
-            {friends.map((friend) => (
-              <div
-                key={friend.id}
-                className="border-border bg-card flex items-center gap-4 rounded-xl border p-4 shadow-sm"
-              >
-                <img
-                  src={friend.avatar}
-                  alt={friend.displayName}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
+          {search.trim() ? (
+            <FriendSearchResult
+              users={searchResults}
+              loading={searchLoading}
+              onSendRequest={handleSendRequest}
+            />
+          ) : (
+            <FriendList
+              friends={friends}
+              loading={friendsLoading}
+              onUnfriend={handleUnfriend}
+            />
+          )}
+        </>
+      )}
 
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-card-foreground font-medium">
-                    {friend.displayName}
-                  </h3>
+      {/* ============================== */}
+      {/* RECEIVED REQUESTS */}
+      {/* ============================== */}
 
-                  <p className="text-muted-foreground text-sm">
-                    @{friend.username}
-                  </p>
-                </div>
+      {activeTab === "requests" && (
+        <FriendRequestList
+          requests={receivedRequests}
+          loading={receivedLoading}
+          onAccept={handleAccept}
+          onReject={handleReject}
+        />
+      )}
 
-                <button className="bg-primary text-primary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition hover:opacity-90">
-                  <MessageCircle size={16} />
-                  Nhắn tin
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+      {/* ============================== */}
+      {/* SENT REQUESTS */}
+      {/* ============================== */}
+
+      {activeTab === "sent" && (
+        <FriendSentRequestList
+          requests={sentRequests}
+          loading={sentLoading}
+          onCancel={handleCancel}
+        />
+      )}
     </div>
   );
-}
+};
+
+export default FriendPage;

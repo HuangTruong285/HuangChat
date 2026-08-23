@@ -129,14 +129,15 @@ export const getFriends = async (userId) => {
 
 // ============================== GET RECEIVED REQUEST LIST ==============================
 export const getReceivedRequests = async (userId) => {
-  const receivedRequests = friendRequestRepository.findReceivedRequests(userId);
+  const receivedRequests =
+    await friendRequestRepository.findReceivedRequests(userId);
 
   return friendMapper.toReceivedFriendRequestList(receivedRequests);
 };
 
 // ============================== GET SENT REQUEST LIST ==============================
 export const getSentRequests = async (userId) => {
-  const sentRequests = friendRequestRepository.findSentRequests(userId);
+  const sentRequests = await friendRequestRepository.findSentRequests(userId);
 
   return friendMapper.toSentFriendRequestList(sentRequests);
 };

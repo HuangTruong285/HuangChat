@@ -1,67 +1,24 @@
 import * as React from "react"
-import {
-  Focusable,
-  OverlayArrow,
-  Tooltip as TooltipPrimitive,
-  TooltipTrigger as TooltipTriggerPrimitive,
-} from "react-aria-components"
+import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
-function TooltipTrigger({
-  delay = 0,
-  children,
-  ...props
-}) {
-  const [trigger, tooltip] = React.Children.toArray(children)
+const TooltipProvider = TooltipPrimitive.Provider
 
-  return (
-    <TooltipTriggerPrimitive data-slot="tooltip-trigger" delay={delay} {...props}>
-      <Focusable>
-        {trigger}
-      </Focusable>
-      {tooltip}
-    </TooltipTriggerPrimitive>
-  );
-}
+const Tooltip = TooltipPrimitive.Root
 
-function Tooltip({
-  className,
-  placement = "top",
-  offset = 4,
-  crossOffset = 0,
-  children,
-  ...props
-}) {
-  return (
-    <TooltipPrimitive
-      data-slot="tooltip-content"
-      placement={placement}
-      offset={offset}
-      crossOffset={crossOffset}
-      className={cn(
-        "z-50 inline-flex w-fit max-w-xs origin-(--trigger-anchor-point) items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-xs text-background has-data-[slot=kbd]:pr-1.5 data-entering:animate-in data-entering:fade-in-0 data-entering:zoom-in-95 data-exiting:animate-out data-exiting:fade-out-0 data-exiting:zoom-out-95 data-[placement=bottom]:slide-in-from-top-2 data-[placement=left]:slide-in-from-right-2 data-[placement=right]:slide-in-from-left-2 data-[placement=top]:slide-in-from-bottom-2 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-sm",
-        className
-      )}
-      {...props}>
-      {children}
-      <OverlayArrow
-        className="z-50 size-2.5 translate-y-[calc(-50%-2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground"
-        style={({ placement, defaultStyle }) => ({
-          ...defaultStyle,
-          rotate: "0deg",
-          translate: "0 0",
-          transform:
-            placement === "bottom"
-              ? "translate(-50%, calc(50% + 2px)) rotate(45deg)"
-              : placement === "top"
-                ? "translate(-50%, calc(-50% - 2px)) rotate(45deg)"
-                : placement === "left"
-                  ? "translate(calc(-50% - 2px), -50%) rotate(45deg)"
-                  : "translate(calc(50% + 2px), -50%) rotate(45deg)",
-        })} />
-    </TooltipPrimitive>
-  );
-}
+const TooltipTrigger = TooltipPrimitive.Trigger
 
-export { Tooltip, TooltipTrigger }
+const TooltipContent = React.forwardRef(({ className, sideOffset = 4, ...props }, ref) => (
+  <TooltipPrimitive.Content
+    ref={ref}
+    sideOffset={sideOffset}
+    className={cn(
+      "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-tooltip-content-transform-origin]",
+      className
+    )}
+    {...props} />
+))
+TooltipContent.displayName = TooltipPrimitive.Content.displayName
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }

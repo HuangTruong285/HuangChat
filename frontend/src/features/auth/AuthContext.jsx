@@ -3,7 +3,11 @@ import { createContext, useState, useEffect } from "react";
 import * as authService from "./auth.service";
 import * as userService from "../user/user.service";
 
-import { getAccessToken, removeAccessToken } from "../../utils/token";
+import {
+  getAccessToken,
+  setAccessToken,
+  removeAccessToken,
+} from "../../utils/token";
 
 export const AuthContext = createContext(null);
 
@@ -22,7 +26,7 @@ export default function AuthProvider({ children }) {
         return;
       }
 
-      const currentUser = await userService.getMe();
+      const currentUser = await userService.getCurrentUser();
       setUser(currentUser);
     } catch (error) {
       removeAccessToken();
@@ -46,7 +50,7 @@ export default function AuthProvider({ children }) {
     setLoading(true);
     try {
       await authService.register(registerData);
-      const currentUser = await userService.getMe();
+      const currentUser = await userService.getCurrentUser();
       setUser(currentUser);
       return currentUser;
     } catch (error) {
@@ -61,7 +65,7 @@ export default function AuthProvider({ children }) {
     setLoading(true);
     try {
       await authService.login(loginData);
-      const currentUser = await userService.getMe();
+      const currentUser = await userService.getCurrentUser();
       setUser(currentUser);
       return currentUser;
     } catch (error) {
