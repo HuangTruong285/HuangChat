@@ -3,7 +3,9 @@ import ApiResponse from "../../utils/ApiResponse.js";
 
 import * as friendService from "./friend.service.js";
 
-// ============================== SEND REQUEST ==============================
+// ==============================
+// SEND REQUEST
+// ==============================
 export const sendRequest = asyncHandler(async (req, res) => {
   const friendRequest = await friendService.sendRequest(
     req.user.id,
@@ -18,7 +20,9 @@ export const sendRequest = asyncHandler(async (req, res) => {
   );
 });
 
-// ============================== ACCEPT REQUEST ==============================
+// ==============================
+// ACCEPT REQUEST
+// ==============================
 export const acceptRequest = asyncHandler(async (req, res) => {
   const friend = await friendService.acceptRequest(
     req.params.requestId,
@@ -28,52 +32,80 @@ export const acceptRequest = asyncHandler(async (req, res) => {
   return ApiResponse.ok(res, "Friend request accepted", friend);
 });
 
-// ============================== REJECT REQUEST ==============================
+// ==============================
+// REJECT REQUEST
+// ==============================
 export const rejectRequest = asyncHandler(async (req, res) => {
   await friendService.rejectRequest(req.params.requestId, req.user.id);
 
-  return ApiResponse.ok(res, "Friend request accepted.");
+  return ApiResponse.ok(res, "Friend request rejected.");
 });
 
-// ============================== CANCEL REQUEST ==============================
+// ==============================
+// CANCEL REQUEST
+// ==============================
 export const cancelRequest = asyncHandler(async (req, res) => {
   await friendService.cancelRequest(req.params.requestId, req.user.id);
 
   return ApiResponse.ok(res, "Friend request canceled.");
 });
 
-// ============================== UNFRIEND ==============================
+// ==============================
+// UNFRIEND
+// ==============================
 export const unfriend = asyncHandler(async (req, res) => {
-  await friendService.unfriend(req.user.id, req.params.friendId);
+  await friendService.unfriend(req.user.id, req.params.userId);
 
   return ApiResponse.ok(res, "Unfriended successfully.");
 });
 
-// ============================== GET FRIEND LIST ==============================
+// ==============================
+// GET FRIEND LIST
+// ==============================
 export const getFriends = asyncHandler(async (req, res) => {
   const friends = await friendService.getFriends(req.user.id);
 
-  return ApiResponse.ok(res, "Lấy danh sách bạn bè thành công", friends);
+  return ApiResponse.ok(
+    res,
+    "Successfully retrieved the friends list.",
+    friends,
+  );
 });
 
-// ============================== GET RECEIVED REQUEST LIST ==============================
+// ==============================
+// GET RECEIVED REQUEST LIST
+// ==============================
 export const getReceivedRequests = asyncHandler(async (req, res) => {
   const requests = await friendService.getReceivedRequests(req.user.id);
 
   return ApiResponse.ok(
     res,
-    "Lấy danh sách lời mời đã nhận thành công",
+    "Retrieve the list of successfully received invitations.",
     requests,
   );
 });
 
-// ============================== GET SENT REQUEST LIST ==============================
+// ==============================
+// GET SENT REQUEST LIST
+// ==============================
 export const getSentRequests = asyncHandler(async (req, res) => {
   const requests = await friendService.getSentRequests(req.user.id);
 
   return ApiResponse.ok(
     res,
-    "Lấy danh sách lời mời đã gửi thành công",
+    "Retrieve the list of successfully sent invitations.",
     requests,
   );
+});
+
+// ============================== GET RELATIONSHIP STATUS ==============================
+export const getRelationshipStatus = asyncHandler(async (req, res) => {
+  const status = await friendService.getRelationshipStatus(
+    req.user.id,
+    req.params.userId,
+  );
+
+  return ApiResponse.ok(res, "Successfully retrieved relationship status.", {
+    status,
+  });
 });

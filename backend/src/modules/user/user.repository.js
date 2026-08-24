@@ -64,7 +64,7 @@ export const updateProfile = async (id, data) => {
   return User.findByIdAndUpdate(
     id,
     { $set: data },
-    { new: true, runValidators: true },
+    { returnDocument: "after", runValidators: true },
   );
 };
 
@@ -73,7 +73,7 @@ export const updateStatus = async (id, status) => {
   return User.findByIdAndUpdate(
     id,
     { status },
-    { new: true, runValidators: true },
+    { returnDocument: "after", runValidators: true },
   );
 };
 

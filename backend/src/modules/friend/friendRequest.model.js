@@ -21,6 +21,16 @@ const friendRequestSchema = new mongoose.Schema(
       maxLength: 300,
       default: "",
     },
+    // Trạng thái của lời mời
+    // pending: chưa xử lý
+    // accepted: chấp nhận
+    // rejected: từ chối
+    // cancelled: đã huỷ
+    status: {
+      type: String,
+      enum: ["pending", "accepted", "rejected", "cancelled"],
+      default: "pending",
+    },
   },
   {
     timestamps: true,

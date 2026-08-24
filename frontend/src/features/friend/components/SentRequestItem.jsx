@@ -14,17 +14,17 @@ const getInitials = (name = "") => {
 };
 
 const SentRequestItem = ({ request, onCancel, onViewProfile }) => {
-  const displayName = request?.displayName || "Người dùng";
-  const username = request?.username || "username";
-  const avatarURL = request?.avatarURL || "";
-  const createdAt = request?.createdAt || "Vừa gửi";
+  const displayName = request.user.displayName || "Người dùng";
+  const username = request.user.username || "username";
+  const avatarUrl = request.user.avatarUrl || "";
+  const createdAt = request.user.createdAt || "Vừa gửi";
 
   return (
     <div className="bg-card flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between">
       {/* User */}
       <div className="flex min-w-0 items-center gap-3">
         <Avatar className="size-12">
-          <AvatarImage src={avatarURL} alt={displayName} />
+          <AvatarImage src={avatarUrl} alt={displayName} />
 
           <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
         </Avatar>
@@ -52,12 +52,16 @@ const SentRequestItem = ({ request, onCancel, onViewProfile }) => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onViewProfile?.(request)}
+          onClick={() => onViewProfile(request)}
         >
           Xem hồ sơ
         </Button>
 
-        <Button variant="outline" size="sm" onClick={() => onCancel?.(request)}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onCancel(request.id)}
+        >
           <X className="size-4" />
           Hủy lời mời
         </Button>

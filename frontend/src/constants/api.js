@@ -23,9 +23,10 @@ export const API = {
     REJECT_REQUEST: (requestId) =>
       `/v1/api/friends/requests/${requestId}/reject`,
     CANCEL_REQUEST: (requestId) => `/v1/api/friends/requests/${requestId}`,
-    UNFRIEND: (friendId) => `/v1/api/friends/${friendId}`,
+    UNFRIEND: (userId) => `/v1/api/friends/${userId}`,
     RECEIVED_REQUESTS: "/v1/api/friends/requests/received",
     SENT_REQUESTS: "/v1/api/friends/requests/sent",
+    GET_RELATIONSHIP_STATUS: (userId) => `/v1/api/friends/status/${userId}`,
   },
 
   CONVERSATION: {

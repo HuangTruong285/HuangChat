@@ -12,7 +12,7 @@ export {
   toFriendRequestList,
   toReceivedFriendRequestList,
   toSentFriendRequestList,
-} from "./fiend.mapper.js";
+} from "./friend.mapper.js";
 export * as friendService from "./friend.service.js";
 export * as friendRepository from "./friend.repository.js";
 export * as friendRequestRepository from "./friendRequest.repository.js";

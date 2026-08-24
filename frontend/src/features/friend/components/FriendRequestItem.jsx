@@ -14,12 +14,10 @@ const getInitials = (name = "") => {
 };
 
 const FriendRequestItem = ({ request, onAccept, onReject }) => {
-  const sender = request?.from;
-
-  const displayName = sender?.displayName || "Người dùng";
-  const username = sender?.username || "";
-  const avatarUrl = sender?.avatarUrl || "";
-  const message = request?.message || "";
+  const displayName = request.user.displayName || "Người dùng";
+  const username = request.user.username || "";
+  const avatarUrl = request.user.avatarUrl || "";
+  const message = request.message || "";
 
   return (
     <div className="bg-card flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -43,7 +41,7 @@ const FriendRequestItem = ({ request, onAccept, onReject }) => {
 
       {/* Actions */}
       <div className="flex shrink-0 gap-2">
-        <Button size="sm" onClick={() => onAccept?.(request.id)}>
+        <Button size="sm" onClick={() => onAccept(request.id)}>
           <Check className="size-4" />
           Chấp nhận
         </Button>
@@ -51,7 +49,7 @@ const FriendRequestItem = ({ request, onAccept, onReject }) => {
         <Button
           size="sm"
           variant="outline"
-          onClick={() => onReject?.(request.id)}
+          onClick={() => onReject(request.id)}
         >
           <X className="size-4" />
           Từ chối

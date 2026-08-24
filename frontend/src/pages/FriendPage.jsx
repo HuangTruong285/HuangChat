@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import * as friendService from "../features/friend/friend.service";
 import * as userService from "../features/user/user.service";
@@ -8,8 +8,8 @@ import FriendTabs from "../features/friend/components/FriendTabs";
 import FriendSearch from "../features/friend/components/FriendSearch";
 import FriendSearchResult from "../features/friend/components/FriendSearchResult";
 import FriendList from "../features/friend/components/FriendList";
-import FriendRequestList from "@/features/friend/components/FriendRequestList";
-import FriendSentRequestList from "@/features/friend/components/SentRequestList";
+import FriendRequestList from "../features/friend/components/FriendRequestList";
+import FriendSentRequestList from "../features/friend/components/SentRequestList";
 
 const FriendPage = () => {
   // ==============================
@@ -34,6 +34,7 @@ const FriendPage = () => {
   // ==============================
   // LOADING
   // ==============================
+  const [refreshing, setRefreshing] = useState(false);
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [receivedLoading, setReceivedLoading] = useState(false);
   const [sentLoading, setSentLoading] = useState(false);
@@ -41,53 +42,47 @@ const FriendPage = () => {
   // ==============================
   // LOAD FRIENDS
   // ==============================
-  const loadFriends = async () => {
+  const loadFriends = useCallback(async () => {
     try {
       setFriendsLoading(true);
-
       const data = await friendService.getFriends();
-
-      setFriends(data);
+      setFriends(data || []);
     } catch (error) {
       console.error("Load friends error:", error);
     } finally {
       setFriendsLoading(false);
     }
-  };
+  }, []);
 
   // ==============================
   // LOAD RECEIVED REQUESTS
   // ==============================
-  const loadReceivedRequests = async () => {
+  const loadReceivedRequests = useCallback(async () => {
     try {
       setReceivedLoading(true);
-
       const data = await friendService.getReceivedRequests();
-
-      setReceivedRequests(data);
+      setReceivedRequests(data ?? []);
     } catch (error) {
       console.error("Load received requests error:", error);
     } finally {
       setReceivedLoading(false);
     }
-  };
+  }, []);
 
   // ==============================
   // LOAD SENT REQUESTS
   // ==============================
-  const loadSentRequests = async () => {
+  const loadSentRequests = useCallback(async () => {
     try {
       setSentLoading(true);
-
       const data = await friendService.getSentRequests();
-
-      setSentRequests(data);
+      setSentRequests(data ?? []);
     } catch (error) {
       console.error("Load sent requests error:", error);
     } finally {
       setSentLoading(false);
     }
-  };
+  }, []);
 
   // ==============================
   // INITIAL LOAD
@@ -96,36 +91,42 @@ const FriendPage = () => {
     loadFriends();
     loadReceivedRequests();
     loadSentRequests();
-  }, []);
+  }, [loadFriends, loadReceivedRequests, loadSentRequests]);
 
-  const handleRefresh = async () => {
-    await Promise.all([
-      loadFriends(),
-      loadReceivedRequests(),
-      loadSentRequests(),
-    ]);
-  };
+  // ==============================
+  // REFRESH ALL
+  // ==============================
+  const handleRefresh = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      await Promise.all([
+        loadFriends(),
+        loadReceivedRequests(),
+        loadSentRequests(),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadFriends, loadReceivedRequests, loadSentRequests]);
   // ==============================
   // SEARCH USERS
   // ==============================
   useEffect(() => {
     const keyword = search.trim();
 
-    // Không có keyword
-    if (!keyword) {
+    if (keyword.length < 2) {
       setSearchResults([]);
+      setSearchLoading(false);
       return;
     }
 
     const timer = setTimeout(async () => {
       try {
         setSearchLoading(true);
-
         const data = await userService.searchUsers({
           keyword,
         });
-
-        setSearchResults(data);
+        setSearchResults(data ?? []);
       } catch (error) {
         console.error("Search users error:", error);
         setSearchResults([]);
@@ -142,12 +143,19 @@ const FriendPage = () => {
   // ==============================
   const handleSendRequest = async (userId) => {
     try {
-      await friendService.sendFriendRequest({
-        to: userId,
-      });
+      await friendService.sendFriendRequest({ to: userId });
 
       // Reload sent requests
       await loadSentRequests();
+
+      // Cập nhật tạm thời trạng thái trong danh sách kết quả tìm kiếm (nếu có)
+      setSearchResults((prev) =>
+        prev.map((user) =>
+          user.id === userId
+            ? { ...user, relationshipStatus: "request_sent" }
+            : user,
+        ),
+      );
     } catch (error) {
       console.error("Send friend request error:", error);
     }
@@ -205,29 +213,26 @@ const FriendPage = () => {
   // ==============================
   // UNFRIEND
   // ==============================
-  const handleUnfriend = async (friendId) => {
+  const handleUnfriend = async (userId) => {
     try {
-      await friendService.unfriend(friendId);
+      await friendService.unfriend(userId);
 
       // Xóa friend khỏi UI
-      setFriends((prev) => prev.filter((item) => item.id !== friendId));
+      setFriends((prev) => prev.filter((item) => item.id !== userId));
     } catch (error) {
       console.error("Unfriend error:", error);
     }
   };
 
+  // ==============================
+  // RENDER
+  // ==============================
   return (
-    <div className="h-screen p-4">
-      {/* ============================== */}
+    <div className="flex h-screen flex-col p-4">
       {/* HEADER */}
-      {/* ============================== */}
+      <FriendHeader onRefresh={handleRefresh} refreshing={refreshing} />
 
-      <FriendHeader onRefresh={handleRefresh} />
-
-      {/* ============================== */}
       {/* TABS */}
-      {/* ============================== */}
-
       <FriendTabs
         value={activeTab}
         onValueChange={setActiveTab}
@@ -236,54 +241,48 @@ const FriendPage = () => {
         sentCount={sentRequests.length}
       />
 
-      {/* ============================== */}
-      {/* FRIENDS */}
-      {/* ============================== */}
+      {/* CONTENT AREA */}
+      <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
+        {/* FRIENDS */}
+        {activeTab === "friends" && (
+          <>
+            <FriendSearch value={search} onChange={setSearch} />
 
-      {activeTab === "friends" && (
-        <>
-          <FriendSearch value={search} onChange={setSearch} />
+            {search.trim() ? (
+              <FriendSearchResult
+                users={searchResults}
+                loading={searchLoading}
+                onSendRequest={handleSendRequest}
+              />
+            ) : (
+              <FriendList
+                friends={friends}
+                loading={friendsLoading}
+                onUnfriend={handleUnfriend}
+              />
+            )}
+          </>
+        )}
 
-          {search.trim() ? (
-            <FriendSearchResult
-              users={searchResults}
-              loading={searchLoading}
-              onSendRequest={handleSendRequest}
-            />
-          ) : (
-            <FriendList
-              friends={friends}
-              loading={friendsLoading}
-              onUnfriend={handleUnfriend}
-            />
-          )}
-        </>
-      )}
+        {/* RECEIVED REQUESTS */}
+        {activeTab === "requests" && (
+          <FriendRequestList
+            requests={receivedRequests}
+            loading={receivedLoading}
+            onAccept={handleAccept}
+            onReject={handleReject}
+          />
+        )}
 
-      {/* ============================== */}
-      {/* RECEIVED REQUESTS */}
-      {/* ============================== */}
-
-      {activeTab === "requests" && (
-        <FriendRequestList
-          requests={receivedRequests}
-          loading={receivedLoading}
-          onAccept={handleAccept}
-          onReject={handleReject}
-        />
-      )}
-
-      {/* ============================== */}
-      {/* SENT REQUESTS */}
-      {/* ============================== */}
-
-      {activeTab === "sent" && (
-        <FriendSentRequestList
-          requests={sentRequests}
-          loading={sentLoading}
-          onCancel={handleCancel}
-        />
-      )}
+        {/* SENT REQUESTS */}
+        {activeTab === "sent" && (
+          <FriendSentRequestList
+            requests={sentRequests}
+            loading={sentLoading}
+            onCancel={handleCancel}
+          />
+        )}
+      </div>
     </div>
   );
 };

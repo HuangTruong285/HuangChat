@@ -26,7 +26,7 @@ export const revokeByTokenHash = async (tokenHash) => {
   return Session.findOneAndUpdate(
     { tokenHash, revoked: false },
     { revoked: true },
-    { new: true },
+    { returnDocument: "after" },
   );
 };
 

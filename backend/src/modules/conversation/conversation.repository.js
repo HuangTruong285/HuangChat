@@ -40,7 +40,7 @@ export const findByUser = async (userId) => {
 // Cập nhật thông tin
 export const updateById = async (conversationId, data) => {
   return Conversation.findByIdAndUpdate(conversationId, data, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
 };
@@ -58,7 +58,7 @@ export const updateLastMessage = async (
       lastMessageAt,
     },
     {
-      new: true,
+      returnDocument: "after",
     },
   );
 };
@@ -73,7 +73,7 @@ export const addParticipant = async (conversationId, participant) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     },
   );
 };
@@ -90,7 +90,7 @@ export const removeParticipant = async (conversationId, userId) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     },
   );
 };
@@ -105,7 +105,7 @@ export const markAsSeen = async (conversationId, userId) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     },
   );
 };
@@ -118,7 +118,7 @@ export const clearSeenBy = async (conversationId) => {
       seenBy: [],
     },
     {
-      new: true,
+      returnDocument: "after",
     },
   );
 };

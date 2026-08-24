@@ -1,33 +1,53 @@
 import * as friendApi from "./friend.api";
 
-export const getFriends = async () => {
-  return await friendApi.getFriends();
+// ==============================
+// FRIENDS
+// ==============================
+
+export const getFriends = () => {
+  return friendApi.getFriends();
 };
 
-export const sendFriendRequest = async ({ to, message = "" }) => {
-  return await friendApi.sendFriendRequest({ to, message });
+export const unfriend = (userId) => {
+  return friendApi.unfriend(userId);
 };
 
-export const acceptFriendRequest = async (requestId) => {
-  return await friendApi.acceptFriendRequest(requestId);
+// ==============================
+// FRIEND REQUEST
+// ==============================
+
+export const sendFriendRequest = ({ to, message = "" }) => {
+  return friendApi.sendFriendRequest({ to, message });
 };
 
-export const rejectFriendRequest = async (requestId) => {
-  return await friendApi.rejectFriendRequest(requestId);
+export const acceptFriendRequest = (requestId) => {
+  return friendApi.acceptFriendRequest(requestId);
 };
 
-export const cancelFriendRequest = async (requestId) => {
-  return await friendApi.cancelFriendRequest(requestId);
+export const rejectFriendRequest = (requestId) => {
+  return friendApi.rejectFriendRequest(requestId);
 };
 
-export const unfriend = async (friendId) => {
-  return await friendApi.unfriend(friendId);
+export const cancelFriendRequest = (requestId) => {
+  return friendApi.cancelFriendRequest(requestId);
 };
 
-export const getReceivedRequests = async () => {
-  return await friendApi.getReceivedRequests();
+// ==============================
+// REQUEST LIST
+// ==============================
+
+export const getReceivedRequests = () => {
+  return friendApi.getReceivedRequests();
 };
 
-export const getSentRequests = async () => {
-  return await friendApi.getSentRequests();
+export const getSentRequests = () => {
+  return friendApi.getSentRequests();
+};
+
+// ==============================
+// RELATIONSHIP
+// ==============================
+
+export const getRelationshipStatus = (userId) => {
+  return friendApi.getRelationshipStatus(userId);
 };

@@ -45,7 +45,7 @@ export const countByConversation = async (conversationId) => {
 // Cập nhật thông tin tin nhắn
 export const updateById = async (messageId, data) => {
   return Message.findByIdAndUpdate(messageId, data, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
 };

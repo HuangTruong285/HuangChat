@@ -19,26 +19,27 @@ import {
 
 const getInitials = (name = "") => {
   return name
-    .split(" ")
+    .trim()
+    .split(/\s+/)
     .map((word) => word[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
 };
 
-const FriendItem = ({ friend, onMessage, onUnfriend, onViewProfile }) => {
-  const isOnline = friend?.status === "online";
+const FriendItem = ({ friend, onUnfriend, onMessage, onViewProfile }) => {
+  const isOnline = friend.user.status === "online";
 
-  const displayName = friend?.displayName || "Người dùng";
-  const username = friend?.username || "";
-  const avatarURL = friend?.avatarURL || "";
+  const displayName = friend.user.displayName || "Người dùng";
+  const username = friend.user.username || "";
+  const avatarUrl = friend.user.avatarUrl || "";
 
   return (
     <div className="flex items-center justify-between gap-4 border-b p-4 last:border-b-0">
       {/* User */}
       <div className="flex min-w-0 items-center gap-3">
         <Avatar className="size-12">
-          <AvatarImage src={avatarURL} alt={displayName} />
+          <AvatarImage src={avatarUrl} alt={displayName} />
 
           <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
 
@@ -88,7 +89,7 @@ const FriendItem = ({ friend, onMessage, onUnfriend, onViewProfile }) => {
 
             <DropdownMenuItem
               variant="destructive"
-              onClick={() => onUnfriend?.(friend.id)}
+              onClick={() => onUnfriend(friend.user.id)}
             >
               Xoá bạn
             </DropdownMenuItem>

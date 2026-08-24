@@ -11,7 +11,7 @@ const FriendTabs = ({
 }) => {
   return (
     <Tabs value={value} onValueChange={onValueChange} className="w-full">
-      <TabsList className="h-auto w-full justify-start rounded-none border-b bg-transparent p-0">
+      <TabsList className="h-auto w-full justify-start rounded-none border-b-2 bg-transparent p-0">
         {/* Bạn bè */}
         <TabsTrigger
           value="friends"
@@ -30,7 +30,7 @@ const FriendTabs = ({
           <Mail className="size-4" />
           <span>Lời mời</span>
           {requestCount > 0 && (
-            <Badge variant="destructive">{requestCount}</Badge>
+            <Badge variant="secondary">{requestCount}</Badge>
           )}
         </TabsTrigger>
 
@@ -41,7 +41,7 @@ const FriendTabs = ({
         >
           <Send className="size-4" />
           <span>Đã gửi</span>
-          {sentCount > 0 && <Badge variant="destructive">{sentCount}</Badge>}
+          {sentCount > 0 && <Badge variant="secondary">{sentCount}</Badge>}
         </TabsTrigger>
       </TabsList>
     </Tabs>
