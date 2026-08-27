@@ -1,41 +1,130 @@
-import { Phone, Video, MoreVertical } from "lucide-react";
-export default function ChatHeader({ conversation }) {
-  return (
-    <div className="border-sidebar-border bg-sidebar flex items-center justify-between border-b p-4">
-      <div className="flex items-center space-x-3">
-        <div className="relative">
-          <img
-            src={
-              conversation?.avatarUrl ??
-              "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80"
-            }
-            alt={conversation?.title ?? "Avatar"}
-            className="h-10 w-10 rounded-full object-cover"
-          />
-          <span className="border-border absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 bg-emerald-500"></span>
-        </div>
-        <div>
-          <h3 className="text-foreground text-sm font-semibold">
-            {conversation?.title ?? "Chọn một cuộc trò chuyện"}
-          </h3>
-          <p className="text-xs text-emerald-400">
-            {conversation ? "Đang hoạt động" : ""}
-          </p>
-        </div>
-      </div>
+import {
+  Phone,
+  Video,
+  MoreVertical,
+  User,
+  BellOff,
+  Trash2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-      {/* Nút thao tác cuộc gọi & menu */}
-      <div className="flex items-center space-x-1 text-slate-400">
-        <button className="rounded-lg p-2 transition-colors hover:bg-slate-800 hover:text-slate-200">
-          <Phone size={18} />
-        </button>
-        <button className="rounded-lg p-2 transition-colors hover:bg-slate-800 hover:text-slate-200">
-          <Video size={18} />
-        </button>
-        <button className="rounded-lg p-2 transition-colors hover:bg-slate-800 hover:text-slate-200">
-          <MoreVertical size={18} />
-        </button>
+import AvatarDefault from "@/assets/image/Avatar.png";
+
+const ChatHeader = ({ conversation }) => {
+  const avatarUrl = conversation?.avatarUrl ?? AvatarDefault;
+  const title = conversation?.title ?? "Chọn một cuộc trò chuyện";
+
+  // Lấy 2 chữ cái đầu tiên làm Fallback Avatar
+  const fallbackText = title
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <TooltipProvider delayDuration={150}>
+      <div className="border-border bg-sidebar flex items-center justify-between border-b p-3 sm:px-4">
+        {/* Thông tin hội thoại */}
+        <div className="flex min-w-0 items-center space-x-3">
+          <div className="relative shrink-0">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={avatarUrl} alt="avatar" />
+              <AvatarFallback>{fallbackText}</AvatarFallback>
+            </Avatar>
+          </div>
+
+          <div className="min-w-0">
+            <h3 className="text-foreground truncate text-sm font-semibold">
+              {title}
+            </h3>
+          </div>
+        </div>
+
+        {/* Nút thao tác cuộc gọi & menu tùy chọn */}
+        <div className="flex items-center space-x-1">
+          {/* Nút Gọi thoại */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground h-9 w-9"
+                aria-label="Gọi thoại"
+              >
+                <Phone size={18} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Gọi thoại</TooltipContent>
+          </Tooltip>
+
+          {/* Nút Gọi video */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground h-9 w-9"
+                aria-label="Gọi video"
+              >
+                <Video size={18} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Gọi video</TooltipContent>
+          </Tooltip>
+
+          {/* Menu tùy chọn thêm */}
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-foreground h-9 w-9"
+                    aria-label="Tùy chọn khác"
+                  >
+                    <MoreVertical size={18} />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Tùy chọn</TooltipContent>
+            </Tooltip>
+
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem className="cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                Xem thông tin
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
+                <BellOff className="mr-2 h-4 w-4" />
+                Tắt thông báo
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Xóa cuộc trò chuyện
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
-}
+};
+
+export default ChatHeader;

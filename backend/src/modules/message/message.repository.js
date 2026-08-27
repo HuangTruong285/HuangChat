@@ -1,21 +1,27 @@
 import Message from "./message.model.js";
+import { USER_CONVERSATION_FIELDS } from "../user/index.js";
 
-// ============================== DELETE ==============================
-
-// Tạo một message
-export const create = async (messageData) => {
+// ==============================
+// DELETE
+// ==============================
+const create = async (messageData) => {
   return Message.create(messageData);
 };
 
-// ============================== READ / FIND ==============================
-
-// Tìm tin nhắn theo id tin nhắn
-export const findById = async (messageId) => {
+// ==============================
+// READ / FIND
+// ==============================
+const findById = async (messageId) => {
   return Message.findById(messageId);
 };
 
-// Lấy tin nhắn của một cuộc trò chuyện với cơ chế phân trang
-export const findByConversation = async (
+const findByIdWithSender = async (messageId) => {
+  return Message.findById(messageId)
+    .populate("senderId", USER_CONVERSATION_FIELDS)
+    .lean();
+};
+
+const findByConversation = async (
   conversationId,
   { page = 1, limit = 30 } = {},
 ) => {
@@ -25,34 +31,43 @@ export const findByConversation = async (
     .sort({ createdAt: 1 })
     .skip(skip)
     .limit(limit)
-    .populate("senderId", "displayName avatarUrl");
+    .populate("senderId", USER_CONVERSATION_FIELDS);
 };
 
-// Lấy tin nhắn mới nhất của một cuộc trò chuyện
-export const findLatestByConversation = async (conversationId) => {
+const findLatestByConversation = async (conversationId) => {
   return Message.findOne({ conversationId })
     .sort({ createdAt: -1 })
-    .populate("senderId", "displayName avatarUrl");
+    .populate("senderId", USER_CONVERSATION_FIELDS);
 };
 
-// Đếm tổng số tin nhắn có trong cuộc trò chuyện này
-export const countByConversation = async (conversationId) => {
+const countByConversation = async (conversationId) => {
   return Message.countDocuments({ conversationId });
 };
 
-// ============================== UPDATE ==============================
-
-// Cập nhật thông tin tin nhắn
-export const updateById = async (messageId, data) => {
+// ==============================
+// UPDATE
+// ==============================
+const updateById = async (messageId, data) => {
   return Message.findByIdAndUpdate(messageId, data, {
     returnDocument: "after",
     runValidators: true,
   });
 };
 
-// ============================== DELETE ==============================
-
-// Xoá tin nhắn theo id message
-export const deleteById = async (messageId) => {
+// ==============================
+// DELETE
+// ==============================
+const deleteById = async (messageId) => {
   return Message.findByIdAndDelete(messageId);
+};
+
+export {
+  create,
+  findById,
+  findByIdWithSender,
+  findByConversation,
+  findLatestByConversation,
+  countByConversation,
+  updateById,
+  deleteById,
 };

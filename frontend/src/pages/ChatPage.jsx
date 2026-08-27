@@ -1,4 +1,4 @@
-import ChatLayout from "../components/chat/ChatLayout";
+import ChatLayout from "../features/chat/ChatLayout";
 
 export default function ChatPage() {
   return <ChatLayout />;

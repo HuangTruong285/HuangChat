@@ -1,30 +1,61 @@
 import fs from "fs/promises";
 
 import ApiError from "../../utils/ApiError.js";
-import * as cloudinary from "../../utils/cloudinary.js";
+import { uploadImage, deleteImage } from "../../service/cloudinary.service.js";
 
 import * as userRepository from "./user.repository.js";
 import * as userMapper from "./user.mapper.js";
 
-// ============================== GET PROFILE ==============================
+import { friendService } from "../friend/index.js";
 
-export const getCurrentUser = async (userId) => {
+// ==============================
+// GET PROFILE
+// ==============================
+const getCurrentUser = async (userId) => {
   // Kiểm tra xem người dùng có tồn tại
   const user = await userRepository.findById(userId);
   if (!user) {
     throw ApiError.notFound("User not found");
   }
-
   return userMapper.toCurrentUser(user);
 };
 
-// ============================== UPDATE PROFILE ==============================
+// ==============================
+// GET PUBLIC PROFILE
+// ==============================
+const getPublicProfile = async (userId, currentUserId) => {
+  const user = await userRepository.findPublicById(userId);
+  if (!user) {
+    throw ApiError.notFound("User not found");
+  }
 
-export const updateProfile = async (userId, data) => {
+  const relationship = await friendService.getRelationshipStatus(
+    currentUserId,
+    userId,
+  );
+
+  return {
+    ...userMapper.toPublicUser(user),
+    relationship,
+  };
+};
+
+// ==============================
+// UPDATE PROFILE
+// ==============================
+const updateProfile = async (userId, data) => {
+  const updateData = {};
+
+  if (data.displayName !== undefined) {
+    updateData.displayName = data.displayName;
+  }
+
+  if (data.bio !== undefined) {
+    updateData.bio = data.bio;
+  }
+
   // Cập nhật thông tin tên hiển thị và trả về thông tin người dùng
-  const user = await userRepository.updateProfile(userId, {
-    displayName: data.displayName,
-  });
+  const user = await userRepository.updateProfile(userId, updateData);
   if (!user) {
     throw ApiError.notFound("User not found");
   }
@@ -32,24 +63,25 @@ export const updateProfile = async (userId, data) => {
   return userMapper.toCurrentUser(user);
 };
 
-// ============================== UPDATE AVATAR ==============================
-
-export const updateAvatar = async (userId, file) => {
+// ==============================
+// UPDATE AVATAR
+// ==============================
+const updateAvatar = async (userId, file) => {
+  // Kiểm tra xem có file không
   if (!file) {
     throw ApiError.badRequest("Avatar is required");
   }
 
+  // Kiểm tra user đó có tồn tại không
   const user = await userRepository.findById(userId);
-
   if (!user) {
     throw ApiError.notFound("User not found");
   }
 
   let result;
-
   try {
     // Upload lên Cloudinary
-    result = await cloudinary.uploadImage(file.path, {
+    result = await uploadImage(file.path, {
       folder: "chatapp/avatars",
     });
 
@@ -63,7 +95,7 @@ export const updateAvatar = async (userId, file) => {
 
     // Xóa avatar cũ trên Cloudinary
     if (oldAvatarId) {
-      await cloudinary.deleteImage(oldAvatarId);
+      await deleteImage(oldAvatarId);
     }
 
     return userMapper.toCurrentUser(updatedUser);
@@ -77,9 +109,10 @@ export const updateAvatar = async (userId, file) => {
   }
 };
 
-// ============================== UPDATE STATUS ==============================
-
-export const updateStatus = async (userId, status) => {
+// ==============================
+// UPDATE STATUS
+// ==============================
+const updateStatus = async (userId, status) => {
   const user = await userRepository.updateStatus(userId, status);
   if (!user) {
     throw ApiError.notFound("User not found");
@@ -87,18 +120,31 @@ export const updateStatus = async (userId, status) => {
   return userMapper.toUserStatus(user);
 };
 
-// ============================== SEARCH ==============================
-
-export const searchUsers = async (keyword) => {
+// ==============================
+// SEARCH
+// ==============================
+const searchUsers = async (keyword) => {
   const users = await userRepository.search(keyword);
   return userMapper.toPublicUsers(users);
 };
 
-// ============================== DELETE CURRENT USER ==============================
+// ==============================
+// DELETE CURRENT USER
+// ==============================
 
-export const deleteCurrentUser = async (userId) => {
+const deleteCurrentUser = async (userId) => {
   const user = await userRepository.deleteById(userId);
   if (!user) {
     throw ApiError.notFound("User not found");
   }
+};
+
+export {
+  getCurrentUser,
+  getPublicProfile,
+  updateProfile,
+  updateAvatar,
+  updateStatus,
+  searchUsers,
+  deleteCurrentUser,
 };

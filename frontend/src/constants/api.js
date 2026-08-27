@@ -8,6 +8,7 @@ export const API = {
 
   USER: {
     ME: "/v1/api/users/me",
+    GET_PROFILE: (userId) => `/v1/api/users/${userId}/profile`,
     UPDATE_PROFILE: "/v1/api/users/me",
     UPDATE_AVATAR: "/v1/api/users/avatar",
     UPDATE_STATUS: "/v1/api/users/status",

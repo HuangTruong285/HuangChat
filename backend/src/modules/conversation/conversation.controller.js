@@ -4,7 +4,7 @@ import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
 // ============================== CREATE DIRECT CONVERSATION ==============================
-export const createDirectConversation = asyncHandler(async (req, res) => {
+const createDirectConversation = asyncHandler(async (req, res) => {
   const conversation = await conversationService.createDirectConversation(
     req.user.id,
     req.body.userId,
@@ -18,7 +18,7 @@ export const createDirectConversation = asyncHandler(async (req, res) => {
 });
 
 // ============================== CREATE GROUP CONVERSATION ==============================
-export const createGroupConversation = asyncHandler(async (req, res) => {
+const createGroupConversation = asyncHandler(async (req, res) => {
   const conversation = await conversationService.createGroupConversation({
     name: req.body.name,
     avatar: req.body.avatar,
@@ -34,7 +34,7 @@ export const createGroupConversation = asyncHandler(async (req, res) => {
 });
 
 // ============================== GET MY CONVERSATIONS ==============================
-export const getMyConversations = asyncHandler(async (req, res) => {
+const getMyConversations = asyncHandler(async (req, res) => {
   const conversations = await conversationService.getMyConversations(
     req.user.id,
   );
@@ -47,7 +47,7 @@ export const getMyConversations = asyncHandler(async (req, res) => {
 });
 
 // ============================== GET CONVERSATION ==============================
-export const getConversation = asyncHandler(async (req, res) => {
+const getConversation = asyncHandler(async (req, res) => {
   const conversation = await conversationService.getConversation(
     req.params.conversationId,
   );
@@ -60,7 +60,7 @@ export const getConversation = asyncHandler(async (req, res) => {
 });
 
 // ============================== ADD PARTICIPANT ==============================
-export const addParticipant = asyncHandler(async (req, res) => {
+const addParticipant = asyncHandler(async (req, res) => {
   const conversation = await conversationService.addParticipant(
     req.params.conversationId,
     req.body.userId,
@@ -70,7 +70,7 @@ export const addParticipant = asyncHandler(async (req, res) => {
 });
 
 // ============================== REMOVE PARTICIPANT ==============================
-export const removeParticipant = asyncHandler(async (req, res) => {
+const removeParticipant = asyncHandler(async (req, res) => {
   const conversation = await conversationService.removeParticipant(
     req.params.conversationId,
     req.params.userId,
@@ -78,3 +78,12 @@ export const removeParticipant = asyncHandler(async (req, res) => {
 
   return ApiResponse.ok(res, "Participant removed successfully", conversation);
 });
+
+export {
+  createDirectConversation,
+  createGroupConversation,
+  getMyConversations,
+  getConversation,
+  addParticipant,
+  removeParticipant,
+};

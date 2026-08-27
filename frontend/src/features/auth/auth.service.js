@@ -6,11 +6,8 @@ import { setAccessToken, removeAccessToken } from "../../utils/token";
 
 export const register = async (registerData) => {
   const response = await authApi.register(registerData);
-
-  const { accessToken } = response.data;
-
+  const { accessToken } = response;
   setAccessToken(accessToken);
-
   return response;
 };
 
@@ -18,11 +15,8 @@ export const register = async (registerData) => {
 
 export const login = async (loginData) => {
   const response = await authApi.login(loginData);
-
-  const { accessToken } = response.data;
-
+  const { accessToken } = response;
   setAccessToken(accessToken);
-
   return response;
 };
 
@@ -30,11 +24,8 @@ export const login = async (loginData) => {
 
 export const refresh = async () => {
   const response = await authApi.refresh();
-
-  const { accessToken } = response.data;
-
+  const { accessToken } = response;
   setAccessToken(accessToken);
-
   return response;
 };
 

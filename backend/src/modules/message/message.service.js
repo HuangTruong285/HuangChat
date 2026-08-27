@@ -5,10 +5,12 @@ import * as messageMapper from "./message.mapper.js";
 import { conversationRepository } from "../conversation/index.js";
 
 import ApiError from "../../utils/ApiError.js";
-import { uploadImage, deleteImage } from "../../utils/cloudinary.js";
+import { uploadImage, deleteImage } from "../../service/cloudinary.service.js";
 
-// ============================== SEND MESSAGE ==============================
-export const sendMessage = async ({
+// ==============================
+// SEND MESSAGE
+// ==============================
+const sendMessage = async ({
   conversationId,
   senderId,
   type = "text",
@@ -92,15 +94,18 @@ export const sendMessage = async ({
     unreadCounts,
   });
 
-  return messageMapper.toMessage(message);
+  const messageWithSender = await messageRepository.findByIdWithSender(
+    message._id,
+  );
+
+  return messageMapper.toMessageWithSender(messageWithSender);
 };
 
-// ============================== GET MESSAGES ==============================
+// ==============================
+// GET MESSAGES
+// ==============================
 // Lấy tin nhắn từ cuộc hội thoại (phân trang)
-export const getMessages = async (
-  conversationId,
-  { page = 1, limit = 30 } = {},
-) => {
+const getMessages = async (conversationId, { page = 1, limit = 30 } = {}) => {
   // Kiểm tra xem cuộc trò chuyện có tồn tại
   const conversation = await conversationRepository.findById(conversationId);
   if (!conversation) {
@@ -112,12 +117,14 @@ export const getMessages = async (
     limit,
   });
 
-  return messageMapper.toMessageList(messages);
+  return messageMapper.toMessageWithSenderList(messages);
 };
 
-// ============================== DELETE MESSAGE ==============================
+// ==============================
+// DELETE MESSAGE
+// ==============================
 // Xoá tin nhắn
-export const deleteMessage = async (messageId) => {
+const deleteMessage = async (messageId) => {
   // Kiểm tra tin nhắn có tồn tại không
   const message = await messageRepository.findById(messageId);
   if (!message) {
@@ -134,3 +141,5 @@ export const deleteMessage = async (messageId) => {
 
   return;
 };
+
+export { sendMessage, getMessages, deleteMessage };

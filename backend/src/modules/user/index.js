@@ -10,3 +10,4 @@ export {
 export * as userService from "./user.service.js";
 export * as userRepository from "./user.repository.js";
 export { default as User } from "./user.model.js";
+export { USER_CONVERSATION_FIELDS } from "./user.constants.js";

@@ -1,23 +1,23 @@
 import Conversation from "./conversation.model.js";
+import { USER_CONVERSATION_FIELDS } from "../user/index.js";
 
-// ============================== CREATE ==============================
-
-// Tạo một cuộc trò chuyện mới
-export const create = async (data) => {
+// ==============================
+// CREATE
+// ==============================
+const create = async (data) => {
   return Conversation.create(data);
 };
 
-// ============================== READ / FIND ==============================
-
-// TÌm cuộc trò chuyện theo ID
-export const findById = async (conversationId) => {
+// ==============================
+// READ / FIND
+// ==============================
+const findById = async (conversationId) => {
   return Conversation.findById(conversationId)
-    .populate("participants.userId", "displayName avatarUrl")
-    .populate("group.createdBy", "displayName avatarUrl");
+    .populate("participants.userId", USER_CONVERSATION_FIELDS)
+    .populate("group.createdBy", USER_CONVERSATION_FIELDS);
 };
 
-// Tìm cuộc trò chuyện 1-1 giữa hai người cụ thể
-export const findDirectConversation = async (userAId, userBId) => {
+const findDirectConversation = async (userAId, userBId) => {
   return Conversation.findOne({
     type: "direct",
     "participants.userId": {
@@ -26,27 +26,25 @@ export const findDirectConversation = async (userAId, userBId) => {
   });
 };
 
-// Lấy tất cả cuộc trò chuyện mà một người dùng tham gia
-export const findByUser = async (userId) => {
+const findByUser = async (userId) => {
   return Conversation.find({
     "participants.userId": userId,
   })
     .sort({ lastMessageAt: -1 })
-    .populate("participants.userId", "displayName avatarUrl");
+    .populate("participants.userId", USER_CONVERSATION_FIELDS);
 };
 
-// ============================== UPDATE ==============================
-
-// Cập nhật thông tin
-export const updateById = async (conversationId, data) => {
+// ==============================
+// UPDATE
+// ==============================
+const updateById = async (conversationId, data) => {
   return Conversation.findByIdAndUpdate(conversationId, data, {
     returnDocument: "after",
     runValidators: true,
   });
 };
 
-// Cập nhật tin nhắn mới nhất
-export const updateLastMessage = async (
+const updateLastMessage = async (
   conversationId,
   lastMessage,
   lastMessageAt = new Date(),
@@ -63,8 +61,7 @@ export const updateLastMessage = async (
   );
 };
 
-// Thêm thành viên mới vào danh sách
-export const addParticipant = async (conversationId, participant) => {
+const addParticipant = async (conversationId, participant) => {
   return Conversation.findByIdAndUpdate(
     conversationId,
     {
@@ -78,8 +75,7 @@ export const addParticipant = async (conversationId, participant) => {
   );
 };
 
-// Xoá một thành viên ra khỏi cuộc trò chuyện
-export const removeParticipant = async (conversationId, userId) => {
+const removeParticipant = async (conversationId, userId) => {
   return Conversation.findByIdAndUpdate(
     conversationId,
     {
@@ -95,8 +91,7 @@ export const removeParticipant = async (conversationId, userId) => {
   );
 };
 
-// Đánh dấu người dùng đã xem tin nhắn
-export const markAsSeen = async (conversationId, userId) => {
+const markAsSeen = async (conversationId, userId) => {
   return Conversation.findByIdAndUpdate(
     conversationId,
     {
@@ -110,8 +105,7 @@ export const markAsSeen = async (conversationId, userId) => {
   );
 };
 
-// Đặt lại danh sách người dùng đã xem về rỗng
-export const clearSeenBy = async (conversationId) => {
+const clearSeenBy = async (conversationId) => {
   return Conversation.findByIdAndUpdate(
     conversationId,
     {
@@ -123,9 +117,23 @@ export const clearSeenBy = async (conversationId) => {
   );
 };
 
-// ============================== DELETE ==============================
-
-// Xoá cuộc trò chuyện
-export const deleteById = async (conversationId) => {
+// ==============================
+// DELETE
+// ==============================
+const deleteById = async (conversationId) => {
   return Conversation.findByIdAndDelete(conversationId);
+};
+
+export {
+  create,
+  findById,
+  findDirectConversation,
+  findByUser,
+  updateById,
+  updateLastMessage,
+  addParticipant,
+  removeParticipant,
+  markAsSeen,
+  clearSeenBy,
+  deleteById,
 };

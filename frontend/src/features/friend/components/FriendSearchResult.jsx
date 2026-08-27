@@ -54,7 +54,7 @@ const FriendSearchResult = ({ users = [], loading = false, onSendRequest }) => {
             {/* User info */}
             <div className="flex min-w-0 items-center gap-3">
               <Avatar className="size-10">
-                <AvatarImage src={user.avatarURL} alt={user.displayName} />
+                <AvatarImage src={user.avatarUrl} alt={user.displayName} />
 
                 <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
               </Avatar>

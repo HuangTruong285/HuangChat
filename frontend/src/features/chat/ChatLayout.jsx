@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 
-import ConversationSidebar from "../../features/conversation/components/ConversationSidebar";
-import ChatHeader from "../../features/message/components/ChatHeader";
-import MessageList from "../../features/message/components/MessageList";
-import MessageInput from "../../features/message/components/MessageInput";
-import useAuth from "../../features/auth/useAuth";
+import ConversationSidebar from "../conversation/components/ConversationSidebar";
+import ChatHeader from "../message/components/ChatHeader";
+import MessageList from "../message/components/MessageList";
+import MessageInput from "../message/components/MessageInput";
+import useAuth from "../auth/useAuth";
 
-import * as conversationService from "../../features/conversation/conversation.service";
-import * as messageService from "../../features/message/message.service";
+import * as conversationService from "../conversation/conversation.service";
+import * as messageService from "../message/message.service";
 
 export default function ChatLayout() {
   const { user } = useAuth();
@@ -20,15 +20,13 @@ export default function ChatLayout() {
   const [sendingMessage, setSendingMessage] = useState(false);
 
   // ==============================
-  // LOAD CONVERSATIONSc
+  // LOAD CONVERSATIONS
   // ==============================
   useEffect(() => {
     const loadConversations = async () => {
       try {
         setLoadingConversations(true);
-
         const data = await conversationService.getMyConversations();
-
         setConversations(data);
       } catch (error) {
         console.error("Failed to load conversations:", error);
@@ -46,24 +44,20 @@ export default function ChatLayout() {
   const handleSelectConversation = async (conversation) => {
     try {
       setActiveConversation(conversation);
-
       setLoadingMessages(true);
 
       const data = await messageService.getMessageByConversation(
         conversation.id,
       );
 
-      console.log(data);
-
       const mappedMessages = data.map((message) => ({
         ...message,
-        isMine: message.senderId === user.id,
+        isMine: message.sender.id === user?.id,
       }));
 
       setMessages(mappedMessages);
     } catch (error) {
-      console.error(error);
-
+      console.error("Failed to load messages:", error);
       setMessages([]);
     } finally {
       setLoadingMessages(false);
@@ -74,9 +68,7 @@ export default function ChatLayout() {
   // SEND MESSAGE
   // ==============================
   const handleSendMessage = async (content) => {
-    if (!content.trim()) return;
-
-    if (!activeConversation) return;
+    if (!content.trim() || !activeConversation) return;
 
     try {
       setSendingMessage(true);
@@ -87,15 +79,24 @@ export default function ChatLayout() {
         content: content.trim(),
       });
 
+      // Cập nhật tín nhắn
       setMessages((prevMessages) => [
         ...prevMessages,
         { ...newMessage, isMine: true },
       ]);
+
+      // Cập nhật lastMessage
+      setConversations((prev) =>
+        prev.map((item) =>
+          item.id === activeConversation.id
+            ? { ...item, lastMessage: newMessage }
+            : item,
+        ),
+      );
     } catch (error) {
-      console.error(error);
+      console.error("Failed to send message:", error);
     } finally {
       setSendingMessage(false);
-      setMessageInput("");
     }
   };
 
@@ -109,12 +110,11 @@ export default function ChatLayout() {
         onSelectConversation={handleSelectConversation}
       />
 
-      {/* Chat */}
-      <main className="bg-background flex min-w-0 flex-1 flex-col">
+      {/* Main Chat Arae */}
+      <main className="bg-background flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         {activeConversation ? (
           <>
             <ChatHeader conversation={activeConversation} />
-
             <MessageList messages={messages} loading={loadingMessages} />
 
             <MessageInput
@@ -128,7 +128,6 @@ export default function ChatLayout() {
               <h2 className="text-muted-foreground text-lg font-semibold">
                 Chọn một cuộc trò chuyện
               </h2>
-
               <p className="text-muted-foreground mt-1 text-sm">
                 Chọn một người để bắt đầu trò chuyện
               </p>

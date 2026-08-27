@@ -1,6 +1,6 @@
 // Thông tin user của chính chủ tài khoản
 // api/users/me
-export const toCurrentUser = (user) => {
+const toCurrentUser = (user) => {
   if (!user) return null;
 
   return {
@@ -8,6 +8,7 @@ export const toCurrentUser = (user) => {
     username: user.username,
     email: user.email,
     displayName: user.displayName,
+    bio: user.bio,
     avatarUrl: user.avatarUrl,
     status: user.status,
     lastSeen: user.lastSeen,
@@ -19,13 +20,14 @@ export const toCurrentUser = (user) => {
 
 // Thông tin public của user
 // api/users/:id
-export const toPublicUser = (user) => {
+const toPublicUser = (user) => {
   if (!user) return null;
 
   return {
     id: user._id?.toString(),
     username: user.username,
     displayName: user.displayName,
+    bio: user.bio,
     avatarUrl: user.avatarUrl,
     status: user.status,
     lastSeen: user.lastSeen,
@@ -33,12 +35,12 @@ export const toPublicUser = (user) => {
 };
 
 // Mapping danh sách user public
-export const toPublicUsers = (users = []) => {
+const toPublicUsers = (users = []) => {
   return users.map(toPublicUser);
 };
 
 // api/users/status/:id
-export const toUserStatus = (user) => {
+const toUserStatus = (user) => {
   if (!user) return null;
 
   return {
@@ -47,3 +49,5 @@ export const toUserStatus = (user) => {
     lastSeen: user.lastSeen,
   };
 };
+
+export { toCurrentUser, toPublicUser, toPublicUsers, toUserStatus };

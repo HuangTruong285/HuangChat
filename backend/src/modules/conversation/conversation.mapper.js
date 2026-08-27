@@ -28,20 +28,19 @@ const getUnreadCount = (conversation, userId) => {
  * avatarUrl : Link tới avatar của thành viện
  * joinedAt : Thời gian thành viên tham gia cuộc hội thoại
  */
-export const toParticipant = (participant) => {
+const toParticipant = (participant) => {
   if (!participant) return null;
 
   const user = participant.userId;
 
   return {
-    user: user?._id ? toPublicUser(user) : null,
-    userId: toId(user),
+    user: toPublicUser(user),
     joinedAt: participant.joinedAt ?? null,
   };
 };
 
 // Trả về danh sách thành viên
-export const toParticipants = (participants = []) => {
+const toParticipants = (participants = []) => {
   return participants.map(toParticipant);
 };
 
@@ -53,7 +52,7 @@ export const toParticipants = (participants = []) => {
  * avatarUrl : Link avatar nhóm
  * createdBy : Id người tạo nhóm
  */
-export const toGroup = (group) => {
+const toGroup = (group) => {
   if (!group) return null;
 
   return {
@@ -72,7 +71,7 @@ export const toGroup = (group) => {
  * senderId : Id người gửi tin nhắn gần nhất
  * createdAt : Thời gian tạo tin nhắn gần nhất
  */
-export const toLastMessage = (lastMessage) => {
+const toLastMessage = (lastMessage) => {
   if (!lastMessage) return null;
 
   return {
@@ -98,7 +97,7 @@ export const toLastMessage = (lastMessage) => {
  * createdAt : Thời gian tạo cuộc hội thoại
  * updatedAt : Thời gian cập nhật cuộc hội thoại
  */
-export const toConversation = (conversation) => {
+const toConversation = (conversation) => {
   if (!conversation) return null;
 
   return {
@@ -119,7 +118,7 @@ export const toConversation = (conversation) => {
 };
 
 // Trả về danh sách conversation tổng quát
-export const toConversationList = (conversations = []) => {
+const toConversations = (conversations = []) => {
   return conversations.map(toConversation);
 };
 
@@ -135,10 +134,10 @@ export const toConversationList = (conversations = []) => {
  * lastMessageAt : Thời gian tin nhắn cuối cùng được gửi
  * unreadCount : Số tin nhắn chưa đọc của bản thân
  */
-export const toConversationListItem = (conversation, currentUserId) => {
+const toConversationItem = (conversation, currentUserId) => {
   if (!conversation || !currentUserId) return null;
 
-  const currentId = currentUserId?.toString();
+  const currentId = toId(currentUserId);
 
   let title = "";
   let avatarUrl = null;
@@ -149,14 +148,12 @@ export const toConversationListItem = (conversation, currentUserId) => {
   }
 
   if (conversation.type == "direct") {
-    const otherParticipant = conversation.participants?.find((participant) => {
-      toId(participant.userId) !== currentId;
-    });
+    const otherParticipant = conversation.participants?.find(
+      (participant) => toId(participant.userId) !== currentId,
+    );
 
     const user = otherParticipant?.userId;
-
-    title = user?.displayName ?? user?.username ?? "Unknown user";
-
+    title = user?.displayName ?? "Unknown user";
     avatarUrl = user?.avatarUrl ?? null;
   }
 
@@ -169,6 +166,12 @@ export const toConversationListItem = (conversation, currentUserId) => {
     lastMessageAt: conversation.lastMessageAt ?? null,
     unreadCount: getUnreadCount(conversation, currentUserId),
   };
+};
+
+const toConversationItems = (conversations = [], currentUserId) => {
+  return conversations.map((conversation) =>
+    toConversationItem(conversation, currentUserId),
+  );
 };
 
 // ==============================
@@ -189,7 +192,7 @@ export const toConversationListItem = (conversation, currentUserId) => {
  * isGroup: Có phải là nhóm không
  * memberCount : Số lượng thành viên
  */
-export const toConversationDetail = (conversation, currentUserId) => {
+const toConversationDetail = (conversation, currentUserId) => {
   if (!conversation || !currentUserId) return null;
 
   return {
@@ -203,7 +206,7 @@ export const toConversationDetail = (conversation, currentUserId) => {
 // ==============================
 // DIRECT CONVERSATION
 // ==============================
-export const toDirectConversation = (conversation, currentUserId) => {
+const toDirectConversation = (conversation, currentUserId) => {
   if (!conversation || conversation.type !== "direct" || !currentUserId) {
     return null;
   }
@@ -221,7 +224,7 @@ export const toDirectConversation = (conversation, currentUserId) => {
   return {
     id: toId(conversation._id),
     type: "direct",
-    user: toPublic(user),
+    user: toPublicUser(user),
     lastMessage: toLastMessage(conversation.lastMessage),
     lastMessageAt: conversation.lastMessageAt ?? null,
     unreadCount: getUnreadCount(conversation, currentUserId),
@@ -231,16 +234,10 @@ export const toDirectConversation = (conversation, currentUserId) => {
 // ==============================
 // GROUP CONVERSATION
 // ==============================
-export const toGroupConversation = (conversation, currentUserId) => {
+const toGroupConversation = (conversation, currentUserId) => {
   if (!conversation || conversation.type !== "group" || !currentUserId) {
     return null;
   }
-
-  const currentUseridString = currentUserId.toString();
-  const unreadCount =
-    conversation.unreadCounts?.get?.(currentUserIdString) ??
-    conversation.unreadCounts?.[currentUserIdString] ??
-    0;
 
   return {
     id: toId(conversation._id),
@@ -257,27 +254,24 @@ export const toGroupConversation = (conversation, currentUserId) => {
 // ==============================
 // CONVERSATION MEMBER
 // ==============================
-export const toConversationMember = (participant) => {
+const toConversationMember = (participant) => {
   if (!participant) return null;
 
   const user = participant.userId;
 
   return {
-    user: user?._id ? toPublicUser(user) : null,
+    user: toPublicUser(user),
     joinedAt: participant.joinedAt ?? null,
   };
 };
 
-// ==============================
-// CONVERSATION PREVIEW
-// ==============================
-export const toConversationPreview = (conversation) => {
-  if (!conversation) return null;
-
-  return {
-    id: toId(conversation._id),
-    type: conversation.type,
-    lastMessage: toLastMessage(conversation.lastMessage),
-    lastMessageAt: conversation.lastMessageAt ?? null,
-  };
+export {
+  toConversation,
+  toConversations,
+  toConversationItem,
+  toConversationItems,
+  toConversationDetail,
+  toDirectConversation,
+  toGroupConversation,
+  toConversationMember,
 };

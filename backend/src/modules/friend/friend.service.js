@@ -155,29 +155,33 @@ export const getSentRequests = async (userId) => {
 // GET RELATIONSHIP STATUS
 // ==============================
 export const getRelationshipStatus = async (currentUserId, targetUserId) => {
-  if (currentUserId === targetUserId) {
+  const currentId = currentUserId.toString();
+  const targetId = targetUserId.toString();
+
+  if (currentId === targetId) {
     return "self";
   }
 
-  const isFriend = await friendRepository.existsFriend(
-    currentUserId,
-    targetUserId,
-  );
+  const isFriend = await friendRepository.existsFriend(currentId, targetId);
+
   if (isFriend) {
     return "friend";
   }
 
-  // Kiểm tra lời mời mình đã gửi đi
-  const sentRequest = await friendRequestRepository.findPendingRequest(
-    currentUserId,
-    targetUserId,
+  const pendingRequest = await friendRequestRepository.findPendingRequest(
+    currentId,
+    targetId,
   );
-  if (sentRequest && sentRequest.from.toString() === currentUserId) {
+
+  if (!pendingRequest) {
+    return "none";
+  }
+
+  if (pendingRequest.from.toString() === currentId) {
     return "request_sent";
   }
 
-  // Nếu có pending request nhưng không phải do mình gửi -> chính là lời mời đã nhận
-  if (sentRequest && sentRequest.to.toString() === currentUserId) {
+  if (pendingRequest.to.toString() === currentId) {
     return "request_received";
   }
 

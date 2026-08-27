@@ -1,38 +1,45 @@
 import * as userApi from "./user.api";
 
-// ============================== GET ME ==============================
-export const getCurrentUser = async () => {
-  const response = await userApi.getCurrentUser();
+// ==============================
+// GET
+// ==============================
 
-  return response.data;
+export const getCurrentUser = () => {
+  return userApi.getCurrentUser();
 };
 
-export const updateMe = async (data) => {
-  const response = await userApi.updateMe(data);
-
-  return response.data;
+export const getPublicProfile = (userId) => {
+  return userApi.getPublicProfile(userId);
 };
 
-export const updateAvatar = async (file) => {
-  const response = await userApi.updateAvatar(file);
+// ==============================
+// UPDATE
+// ==============================
 
-  return response.data;
+export const updateProfile = (data) => {
+  return userApi.updateMe(data);
 };
 
-export const updateStatus = async (status) => {
-  const response = await userApi.updateStatus(status);
-
-  return response.data;
+export const updateAvatar = (file) => {
+  return userApi.updateAvatar(file);
 };
 
-export const searchUsers = async (params) => {
-  const response = await userApi.searchUsers(params);
-
-  return response.data;
+export const updateStatus = (status) => {
+  return userApi.updateStatus(status);
 };
 
-export const deleteCurrentuser = async () => {
-  const response = await userApi.deleteCurrentUser();
+// ==============================
+// SEARCH
+// ==============================
 
-  return response.data;
+export const searchUsers = (params) => {
+  return userApi.searchUsers(params);
+};
+
+// ==============================
+// DELETE
+// ==============================
+
+export const deleteCurrentUser = () => {
+  return userApi.deleteCurrentUser();
 };

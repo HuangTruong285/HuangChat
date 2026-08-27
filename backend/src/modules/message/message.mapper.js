@@ -26,7 +26,7 @@ export const toMessage = (message) => {
   if (!message) return null;
 
   return {
-    id: toId(message._id ?? message.id),
+    id: toId(message._id),
     conversationId: toId(message.conversationId),
     senderId: toId(message.senderId),
     type: message.type,
@@ -51,7 +51,7 @@ export const toMessageWithSender = (message) => {
   return {
     id: toId(message._id),
     conversationId: toId(message.conversationId),
-    sender: message.senderId?._id ? toPublicUser(message.senderId) : null,
+    sender: toPublicUser(message.senderId),
     type: message.type,
     content: message.content ?? "",
     imgUrl: message.imgUrl ?? null,

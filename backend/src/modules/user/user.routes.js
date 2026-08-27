@@ -12,34 +12,36 @@ import upload from "../../middleware/upload.middleware.js";
 
 const router = Router();
 
-// Hồ sơ của chính mình
+// ==============================
+// OTHER USER
+// ==============================
 router.get("/me", userController.getCurrentUser);
 
-// Cập nhật thông tin cá nhân
 router.patch(
   "/me",
   validate(updateProfileSchema),
   userController.updateProfile,
 );
 
-// Cập nhật avatar
 router.patch("/avatar", upload.single("avatar"), userController.updateAvatar);
 
-// Cập nhật trạng thái online / offline
 router.patch(
   "/status",
   validate(updateStatusSchema),
   userController.updateStatus,
 );
 
-// Tìm kiếm người dùng
+router.delete("/me", userController.deleteCurrentUser);
+
+// ==============================
+// OTHER USER
+// ==============================
 router.get(
   "/search",
   validate(searchUsersSchema, "query"),
   userController.searchUsers,
 );
 
-// Xóa tài khoản của chính mình
-router.delete("/me", userController.deleteCurrentUser);
+router.get("/:userId/profile", userController.getPublicProfile);
 
 export default router;

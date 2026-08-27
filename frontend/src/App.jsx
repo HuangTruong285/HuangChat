@@ -8,7 +8,8 @@ import NotFound from "./pages/NotFound";
 import LoadingPage from "./pages/LoadingPage";
 import ChatPage from "./pages/ChatPage";
 import FriendPage from "./pages/FriendPage";
-import SettingPage from "./pages/SettingPage";
+import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 import useAuth from "./features/auth/useAuth";
 
@@ -35,7 +36,8 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/friend" element={<FriendPage />} />
-            <Route path="/setting" element={<SettingPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

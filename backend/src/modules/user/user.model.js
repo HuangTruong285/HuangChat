@@ -32,6 +32,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Mô tả ngắn trên Profile
+    bio: {
+      type: String,
+      default: null,
+      trim: true,
+      maxLength: 160,
+    },
+
     // Đường dẫn xem ảnh đại diện (URL)
     avatarUrl: {
       type: String,
@@ -47,7 +55,7 @@ const userSchema = new mongoose.Schema(
     // Trạng thái hoạt động phục vụ hiển thị online/offline trong ứng dụng chat
     status: {
       type: String,
-      enum: ["offline", "online"],
+      enum: ["offline", "online", "away", "busy"],
       default: "offline",
     },
 

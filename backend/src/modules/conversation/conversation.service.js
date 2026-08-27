@@ -3,8 +3,10 @@ import * as conversationMapper from "./conversation.mapper.js";
 
 import ApiError from "../../utils/ApiError.js";
 
-// ============================== CREATE DIRECT CONVERSATION ==============================
-export const createDirectConversation = async (userAId, userBId) => {
+// ==============================
+// CREATE DIRECT CONVERSATION
+// ==============================
+const createDirectConversation = async (userAId, userBId) => {
   // Kiểm tra xem có phải hai người khác nhau không
   if (userAId.toString() === userBId.toString()) {
     throw ApiError.badRequest("Cannot create conversation with yourself");
@@ -32,8 +34,10 @@ export const createDirectConversation = async (userAId, userBId) => {
   return conversationMapper.toConversation(directConversation);
 };
 
-// ============================== CREATE GROUP CONVERSATION ==============================
-export const createGroupConversation = async ({
+// ==============================
+// CREATE GROUP CONVERSATION
+// ==============================
+const createGroupConversation = async ({
   name,
   avatarUrl = "",
   createdBy,
@@ -79,18 +83,20 @@ export const createGroupConversation = async ({
   return conversationMapper.toConversation(groupConversation);
 };
 
-// ============================== GET MY CONVERSATIONS ==============================
+// ==============================
+// GET MY CONVERSATIONS
+// ==============================
 // Lấy tất cả cuộc trò chuyện của tôi
-export const getMyConversations = async (userId) => {
+const getMyConversations = async (userId) => {
   const myConversations = await conversationRepository.findByUser(userId);
-  return myConversations.map((conversation) =>
-    conversationMapper.toConversationListItem(conversation, userId),
-  );
+  return conversationMapper.toConversationItems(myConversations, userId);
 };
 
-// ============================== GET CONVERSATION ==============================
+// ==============================
+// GET CONVERSATION
+// ==============================
 // Lấy cuộc trò chuyện được chọn
-export const getConversation = async (conversationId) => {
+const getConversation = async (conversationId) => {
   const conversation = await conversationRepository.findById(conversationId);
   if (!conversation) {
     throw ApiError.notFound("Conversation not found");
@@ -99,8 +105,10 @@ export const getConversation = async (conversationId) => {
   return conversationMapper.toConversation(conversation);
 };
 
-// ============================== ADD PARTICIPANT ==============================
-export const addParticipant = async (conversationId, userId) => {
+// ==============================
+// ADD PARTICIPANT
+// ==============================
+const addParticipant = async (conversationId, userId) => {
   // Kiểm tra cuộc trò chuyện tồn tại không
   const conversation = await conversationRepository.findById(conversationId);
   if (!conversation) {
@@ -128,11 +136,13 @@ export const addParticipant = async (conversationId, userId) => {
     },
   );
 
-  return conversationMapper.toParticipants(conversation.participants);
+  return conversationMapper.toParticipants(newConversation.participants);
 };
 
-// ============================== REMOVE PARTICIPANT ==============================
-export const removeParticipant = async (conversationId, userId) => {
+// ==============================
+// REMOVE PARTICIPANT
+// ==============================
+const removeParticipant = async (conversationId, userId) => {
   // Tìm xem có cuộc trò chuyện đó không
   const conversation = await conversationRepository.findById(conversationId);
   if (!conversation) {
@@ -140,4 +150,13 @@ export const removeParticipant = async (conversationId, userId) => {
   }
 
   return conversationRepository.removeParticipant(conversationId, userId);
+};
+
+export {
+  createDirectConversation,
+  createGroupConversation,
+  getMyConversations,
+  getConversation,
+  addParticipant,
+  removeParticipant,
 };
