@@ -2,7 +2,7 @@ import { Mail, Phone, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const ProfileInfo = () => {
+const ProfileInfo = ({ user }) => {
   return (
     <Card>
       <CardHeader>
@@ -19,7 +19,7 @@ const ProfileInfo = () => {
           <div>
             <p className="text-muted-foreground text-sm">Username</p>
 
-            <p className="font-medium">@truong</p>
+            <p className="font-medium">@{user.username}</p>
           </div>
         </div>
 
@@ -32,7 +32,7 @@ const ProfileInfo = () => {
           <div>
             <p className="text-muted-foreground text-sm">Email</p>
 
-            <p className="font-medium">example@gmail.com</p>
+            <p className="font-medium">{user.email}</p>
           </div>
         </div>
 
@@ -45,7 +45,7 @@ const ProfileInfo = () => {
           <div>
             <p className="text-muted-foreground text-sm">Phone</p>
 
-            <p className="font-medium">0123456789</p>
+            <p className="font-medium">chua lam</p>
           </div>
         </div>
       </CardContent>

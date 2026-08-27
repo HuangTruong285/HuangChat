@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-const ProfileHeader = () => {
+const ProfileHeader = ({ user }) => {
   return (
     <Card className="overflow-hidden">
       {/* Cover */}
@@ -15,7 +15,7 @@ const ProfileHeader = () => {
         <div className="-mt-14 flex justify-center md:justify-start">
           <div className="relative">
             <Avatar className="border-background h-28 w-28 border-4">
-              <AvatarImage src="" alt="Truong Hoang" />
+              <AvatarImage src={user.avatarUrl} alt={user.displayName} />
               <AvatarFallback className="text-2xl">TH</AvatarFallback>
             </Avatar>
 
@@ -32,11 +32,11 @@ const ProfileHeader = () => {
         {/* User information */}
         <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Truong Hoang</h1>
+            <h1 className="text-2xl font-bold">{user.displayName}</h1>
 
-            <p className="text-muted-foreground text-sm">@truong</p>
+            <p className="text-muted-foreground text-sm">@{user.username}</p>
 
-            <p className="mt-3 max-w-xl text-sm">Hello, I'm using WebChat.</p>
+            <p className="mt-3 max-w-xl text-sm">{user.bio}</p>
           </div>
 
           <Button>
