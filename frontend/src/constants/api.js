@@ -12,6 +12,7 @@ export const API = {
     UPDATE_PROFILE: "/v1/api/users/me",
     UPDATE_AVATAR: "/v1/api/users/avatar",
     UPDATE_STATUS: "/v1/api/users/status",
+    CHANGE_PASSWORD: "v1/api/users/password",
     SEARCH: "/v1/api/users/search",
     DELETE_ME: "/v1/api/users/me",
   },

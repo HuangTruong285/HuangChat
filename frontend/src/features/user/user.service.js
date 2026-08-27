@@ -28,6 +28,10 @@ export const updateStatus = (status) => {
   return userApi.updateStatus(status);
 };
 
+export const changePassword = (data) => {
+  return userApi.changePassword(data);
+};
+
 // ==============================
 // SEARCH
 // ==============================

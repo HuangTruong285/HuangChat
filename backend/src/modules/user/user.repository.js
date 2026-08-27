@@ -14,6 +14,10 @@ const findById = async (id) => {
   return User.findById(id);
 };
 
+const findByIdWithPassword = async (userId) => {
+  return User.findById(userId).select("+hashedPassword");
+};
+
 const findPublicById = async (id) => {
   return User.findById(id).select(
     "username displayName bio avatarUrl status lastSeen",
@@ -89,6 +93,7 @@ const deleteById = async (id) => {
 export {
   create,
   findById,
+  findByIdWithPassword,
   findPublicById,
   findByUsername,
   findByEmail,

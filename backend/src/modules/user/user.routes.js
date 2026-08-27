@@ -4,6 +4,7 @@ import * as userController from "./user.controller.js";
 import {
   updateProfileSchema,
   updateStatusSchema,
+  changePasswordSchema,
   searchUsersSchema,
 } from "./user.validator.js";
 
@@ -13,7 +14,7 @@ import upload from "../../middleware/upload.middleware.js";
 const router = Router();
 
 // ==============================
-// OTHER USER
+// CURRENT USER
 // ==============================
 router.get("/me", userController.getCurrentUser);
 
@@ -29,6 +30,12 @@ router.patch(
   "/status",
   validate(updateStatusSchema),
   userController.updateStatus,
+);
+
+router.patch(
+  "/password",
+  validate(changePasswordSchema),
+  userController.changePassword,
 );
 
 router.delete("/me", userController.deleteCurrentUser);

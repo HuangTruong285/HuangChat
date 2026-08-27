@@ -8,6 +8,8 @@ import * as userMapper from "./user.mapper.js";
 
 import { friendService } from "../friend/index.js";
 
+import { hashPassword, comparePassword } from "../../utils/password.js";
+
 // ==============================
 // GET PROFILE
 // ==============================
@@ -120,6 +122,36 @@ const updateStatus = async (userId, status) => {
   return userMapper.toUserStatus(user);
 };
 
+const changePassword = async ({ userId, currentPassword, newPassword }) => {
+  // Kiểm tra user có tồn tại không và láy cả mật khẩu
+  const user = await userRepository.findByIdWithPassword(userId);
+  if (!user) {
+    throw ApiError.notFound("User not found");
+  }
+
+  // Kiểm tra mật khẩu có đúng không
+  const isPasswordValid = await comparePassword(
+    currentPassword,
+    user.hashedPassword,
+  );
+  if (!isPasswordValid) {
+    throw ApiError.badRequest("Current password is incorrect");
+  }
+
+  // Kiểm tra dữ liệu cũ và mới có giống nhau không
+  if (currentPassword === newPassword) {
+    throw ApiError.badRequest(
+      "New password must be different from current password",
+    );
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+
+  await userRepository.updatePassword(userId, hashedPassword);
+
+  return true;
+};
+
 // ==============================
 // SEARCH
 // ==============================
@@ -145,6 +177,7 @@ export {
   updateProfile,
   updateAvatar,
   updateStatus,
+  changePassword,
   searchUsers,
   deleteCurrentUser,
 };

@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import * as userService from "@/features/user/user.service";
+
 const PasswordSettings = () => {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -34,10 +36,21 @@ const PasswordSettings = () => {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    console.log("Password data:", form);
+    try {
+      setSaving(true);
+
+      await userService.changePassword({
+        currentPassword: form.currentPassword,
+        newPassword: form.newPassword,
+      });
+    } catch (error) {
+      console.error("Failed to change password", error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

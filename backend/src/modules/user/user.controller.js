@@ -34,6 +34,16 @@ const updateStatus = asyncHandler(async (req, res) => {
   return ApiResponse.ok(res, "Status successfully updated", user);
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  await userService.changePassword({
+    userId: req.user.id,
+    currentPassword: req.body.currentPassword,
+    newPassword: req.body.newPassword,
+  });
+
+  return ApiResponse.ok(res, "Password changed successfully");
+});
+
 const deleteCurrentUser = asyncHandler(async (req, res) => {
   await userService.deleteCurrentUser(req.user.id);
 
@@ -65,6 +75,7 @@ export {
   updateProfile,
   updateAvatar,
   updateStatus,
+  changePassword,
   deleteCurrentUser,
   getPublicProfile,
   searchUsers,

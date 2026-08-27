@@ -28,14 +28,13 @@ const userSchema = new mongoose.Schema(
     // Tên hiển thị trong ứng dụng chat (ví dụ: Biệt danh, Tên thật)
     displayName: {
       type: String,
-      required: true,
       trim: true,
     },
 
     // Mô tả ngắn trên Profile
     bio: {
       type: String,
-      default: null,
+      default: "",
       trim: true,
       maxLength: 160,
     },

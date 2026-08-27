@@ -52,7 +52,11 @@ export const updateAvatar = async (file) => {
 
 export const updateStatus = async (status) => {
   const response = await api.patch(API.USER.UPDATE_STATUS, { status });
+  return response.data.data;
+};
 
+export const changePassword = async (data) => {
+  const response = await api.patch(API.USER.CHANGE_PASSWORD, data);
   return response.data.data;
 };
 
@@ -74,6 +78,5 @@ export const searchUsers = async (params) => {
 
 export const deleteCurrentUser = async () => {
   const response = await api.delete(API.USER.DELETE_ME);
-
   return response.data.data;
 };
