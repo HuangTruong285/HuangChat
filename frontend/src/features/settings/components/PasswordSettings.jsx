@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Eye, EyeOff, LockKeyhole } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +22,8 @@ const PasswordSettings = () => {
     newPassword: "",
     confirmPassword: "",
   });
+
+  const [saving, setSaving] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -43,9 +51,9 @@ const PasswordSettings = () => {
           <div>
             <CardTitle>Change password</CardTitle>
 
-            <p className="text-muted-foreground text-sm">
+            <CardDescription>
               Keep your account secure with a strong password.
-            </p>
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -63,6 +71,7 @@ const PasswordSettings = () => {
                 type={showCurrent ? "text" : "password"}
                 value={form.currentPassword}
                 onChange={handleChange}
+                placeholder="Enter your current password"
                 className="pr-10"
               />
 
@@ -91,6 +100,7 @@ const PasswordSettings = () => {
                 type={showNew ? "text" : "password"}
                 value={form.newPassword}
                 onChange={handleChange}
+                placeholder="Enter your new password"
                 className="pr-10"
               />
 
@@ -123,6 +133,7 @@ const PasswordSettings = () => {
                 type={showConfirm ? "text" : "password"}
                 value={form.confirmPassword}
                 onChange={handleChange}
+                placeholder="Confirm your new password"
                 className="pr-10"
               />
 
@@ -142,7 +153,9 @@ const PasswordSettings = () => {
 
           {/* Actions */}
           <div className="flex justify-end border-t pt-6">
-            <Button type="submit">Change password</Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Changing..." : "Change password"}
+            </Button>
           </div>
         </form>
       </CardContent>

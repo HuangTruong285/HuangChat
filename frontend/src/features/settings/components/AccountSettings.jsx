@@ -1,59 +1,124 @@
 import { LogOut, Mail, Phone, ShieldCheck } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+import { getCurrentUser } from "../../user/user.service";
+import { useState, useEffect } from "react";
+
 const AccountSettings = () => {
+  const [form, setForm] = useState({
+    email: "",
+    phone: " ",
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAccount = async () => {
+      try {
+        const user = await getCurrentUser();
+
+        setForm({
+          email: user.email || "",
+          phone: user.phone || "",
+        });
+      } catch (error) {
+        console.error("Failed to load account:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccount();
+  }, []);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    console.log("Account form:", form);
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="py-10 text-center">
+          Loading account...
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Account</CardTitle>
 
-          <p className="text-muted-foreground text-sm">
-            Manage your account information.
-          </p>
+          <CardDescription>Manage your account information.</CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* Email */}
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
 
-            <div className="relative">
-              <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <div className="relative">
+                <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
 
-              <Input
-                id="email"
-                className="pl-9"
-                value="example@gmail.com"
-                disabled
-              />
+                <Input
+                  id="email"
+                  className="pl-9"
+                  value={form.email}
+                  disabled
+                />
+              </div>
+
+              <p className="text-muted-foreground text-xs">
+                Your email address cannot be changed here.
+              </p>
             </div>
 
-            <p className="text-muted-foreground text-xs">
-              Your email address cannot be changed here.
-            </p>
-          </div>
+            {/* Phone */}
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
 
-          {/* Phone */}
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
+              <div className="relative">
+                <Phone className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
 
-            <div className="relative">
-              <Phone className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-
-              <Input id="phone" className="pl-9" defaultValue="0123456789" />
+                <Input
+                  id="phone"
+                  className="pl-9"
+                  value={form.phone}
+                  onChange={handleChange}
+                  placeholder="0123456789"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="flex justify-end border-t pt-6">
-            <Button>Save changes</Button>
-          </div>
+            <div className="flex justify-end border-t pt-6">
+              <Button type="submit">Save changes</Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
 
